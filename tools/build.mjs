@@ -13,6 +13,7 @@
  * Usage: node tools/build.mjs [--target=web|artifact|both] [--quiet]
  */
 import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MARKUP, SCRIPTS, STYLES } from './manifest.mjs';
@@ -41,7 +42,11 @@ const js = SCRIPTS.map(p => banner(p) + read(p)).join('\n');
    the bundle, so the whole bundle is strict and the rest is not noise. */
 const bundle = '"use strict";\n' + js.replace(/^\s*"use strict";\s*$/gm, '');
 
-const stamp = `<!-- built ${new Date().toISOString()} from src/ by tools/build.mjs — edit src/, not this file -->`;
+/* A content digest, not a timestamp: the build has to be reproducible, or every
+   rebuild shows a diff even when nothing changed and CI cannot tell a stale
+   docs/ from a fresh one. */
+const digest = createHash('sha256').update(markup).update(css).update(bundle).digest('hex').slice(0, 12);
+const stamp = `<!-- generated from src/ by tools/build.mjs — source digest ${digest} — edit src/, not this file -->`;
 
 let wrote = [];
 
@@ -87,6 +92,6 @@ if (target === 'artifact' || target === 'both') {
   wrote.push(['build/artifact/index.html', single.length]);
 }
 
-log('build ok');
+log(`build ok  (source digest ${digest})`);
 for (const [f, n] of wrote) log(`  ${f.padEnd(30)} ${(n / 1024).toFixed(1)} KiB`);
 log(`  sources: ${MARKUP.length} markup, ${SCRIPTS.length} scripts, ${STYLES.length} stylesheet`);

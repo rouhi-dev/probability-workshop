@@ -20,7 +20,14 @@ test('no build placeholder survives into the output', () => {
   assert.notMatch(html, /<!--APP-->/, 'template marker still present');
   // The build substitutes one HTML comment marker; it is not a brace templating
   // engine, and `}}` occurs legitimately in LaTeX (\bar{B}}, F_{\text{...}}).
-  assert.match(html, /built \d{4}-\d{2}-\d{2}T/, 'build stamp missing');
+  assert.match(html, /source digest [0-9a-f]{12}/, 'build stamp missing');
+});
+
+test('the build is reproducible — no timestamp in the output', () => {
+  // A timestamp would make every rebuild produce a diff, which defeats the CI
+  // check that docs/ is in sync with src/.
+  assert.notMatch(html, /built \d{4}-\d{2}-\d{2}T/, 'timestamp leaked into the build');
+  assert.notMatch(js, /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'timestamp leaked into the bundle');
 });
 
 test('every manifest source is represented in the bundle', () => {
