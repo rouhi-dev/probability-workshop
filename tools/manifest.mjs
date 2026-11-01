@@ -8,6 +8,7 @@ export const MARKUP = [
   'src/views/dep-map.html',
   'src/views/theorems.html',
   'src/views/prereqs.html',
+  'src/views/assignment.html',
   'src/lessons/lesson-01-sample-space.html',
   'src/lessons/lesson-cdf-question.html',
   'src/views/_shell-close.html',
@@ -22,6 +23,10 @@ export const DATA = [
   'src/data/prereqs.js',
   'src/data/quizzes.js',
   'src/data/exercises.js',
+  'src/data/assignment-a.js',
+  'src/data/assignment-b.js',
+  'src/data/assignment-c.js',
+  'src/data/assignment-map.js',
 ];
 
 // Application: core helpers -> persistence -> mastery -> renderers -> boot.
@@ -37,6 +42,8 @@ export const APP = [
   'src/js/quiz.js',
   'src/js/exercises.js',
   'src/js/dep-graph.js',
+  'src/js/assignment.js',
+  'src/js/exam.js',
   'src/js/main.js',
 ];
 
@@ -46,6 +53,7 @@ export const INSTRUMENTS = [
   'src/js/instruments/experiment.js',
   'src/js/instruments/venn.js',
   'src/js/instruments/cdf.js',
+  'src/js/instruments/assignment-viz.js',
   'src/js/instruments/wiring.js',
 ];
 

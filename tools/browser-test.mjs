@@ -168,6 +168,13 @@ try {
     });`);
     void mark;
   };
+  /* Hash navigation inside the already-loaded document: no reload and no MathJax
+     restart, which matters now that the bundle carries the whole assignment.
+     goto() (a real load) stays for the checks that genuinely test persistence. */
+  const nav = async (hash, settle = 400) => {
+    await cdp.eval('location.hash = ' + JSON.stringify(hash) + ';');
+    await cdp.eval('return new Promise(r => requestAnimationFrame(() => setTimeout(r, ' + settle + ')));');
+  };
   const setViewport = (w, h, mobile = false) => cdp.send('Emulation.setDeviceMetricsOverride',
     { width: w, height: h, deviceScaleFactor: 1, mobile });
   const shot = async name => {
@@ -249,7 +256,7 @@ try {
   G('views');
   await check('nav rail lists every section plus the locked lessons', async () => {
     const n = await cdp.eval(`return document.querySelectorAll('#rail a').length`);
-    atLeast(n, 11, 'rail links');
+    atLeast(n, 13, 'rail links');
     atLeast(await cdp.eval(`return document.querySelectorAll('#rail a.locked').length`), 4, 'locked lessons shown');
   });
   await check('dashboard renders KPIs, readiness, topic rows and prerequisites', async () => {
@@ -408,6 +415,153 @@ try {
     truthy(ok, 'zoom readout and canvas');
   });
 
+  /* ---- assignment module ---- */
+  G('assignment 1');
+  await check('assignment dashboard lists all 11 problems with coverage tables', async () => {
+    await nav('#v-a1');
+    eq(await cdp.eval(`return document.querySelectorAll('#a1List .ex').length`), 11, 'problem cards');
+    atLeast(await cdp.eval(`return document.querySelectorAll('#a1Kpis .kpi').length`), 5, 'KPI tiles');
+    atLeast(await cdp.eval(`return document.querySelectorAll('#a1Coverage table').length`), 2, 'coverage tables');
+    atLeast(await cdp.eval(`return document.querySelectorAll('#a1Bridges tbody tr').length`), 4, 'bridge rows');
+    truthy(await cdp.eval(`return /پوشش داده نمی‌شود/.test(document.getElementById('a1Coverage').innerText)`),
+      'the "not covered" panel must be visible');
+  });
+  await check('deep link #v-a1/p3 opens that problem workspace', async () => {
+    await nav('#v-a1/p3', 900);
+    const shown = await cdp.eval(`return [...document.querySelectorAll('section.view')].filter(s=>!s.hidden).map(s=>s.id)`);
+    eq(shown.join(), 'v-a1w', 'workspace view');
+    truthy(await cdp.eval(`return /مسئله ۳ از ۱۱/.test(document.getElementById('a1Work').innerText)`), 'problem 3 header');
+    truthy(await cdp.eval(`return /۱۴۴/.test(document.getElementById('a1Work').innerText)`), 'original statement present');
+  });
+  await check('the worked solution stays hidden until explicitly requested', async () => {
+    await nav('#v-a1/p5');
+    truthy(await cdp.eval(`return !!document.querySelector('[data-a1sol]')`), 'reveal button present');
+    truthy(await cdp.eval(`return !/C=\\\\frac\\{3\\}\\{4\\}|اعتبارسنجی/.test(document.getElementById('a1Work').innerText)`),
+      'solution content must not be in the DOM before reveal');
+    await cdp.eval(`document.querySelector('[data-a1sol]').click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,500));`);
+    truthy(await cdp.eval(`return /اشتباهات رایج/.test(document.getElementById('a1Work').innerText)`),
+      'solution and follow-on sections appear after reveal');
+  });
+  await check('variant hints open one at a time, never all at once', async () => {
+    await nav('#v-a1/p5');
+    const before = await cdp.eval(`return (document.getElementById('a1Vars').innerText.match(/راهنمایی ۱:/g)||[]).length`);
+    eq(before, 0, 'no hint body visible initially');
+    await cdp.eval(`document.querySelector('#a1Vars [data-a1h]').click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,300));`);
+    const after = await cdp.eval(`return (document.getElementById('a1Vars').innerText.match(/راهنمایی ۱:/g)||[]).length`);
+    eq(after, 1, 'exactly one hint after one click');
+    truthy(await cdp.eval(`return (document.getElementById('a1Vars').innerText.match(/راهنمایی ۲:/g)||[]).length === 0`),
+      'the second hint must stay closed');
+  });
+  await check('mastery needs the checkpoint AND written work AND two variants', async () => {
+    await nav('#v-a1/p7');
+    const step = async () => await cdp.eval(`
+      return [...document.querySelectorAll('#a1List .pill')].length ? '' : '';`);
+    void step;
+    // 1) correct checkpoint only
+    await cdp.eval(`
+      const opts=[...document.querySelectorAll('#a1Check .opt')];
+      opts[0].click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,300));`);
+    let st = await cdp.eval(`return a1Status('p7')`);
+    truthy(st !== 'mastered', `checkpoint alone gave "${st}"`);
+    // 2) add written work
+    await cdp.eval(`
+      const ta=document.getElementById('a1ta');
+      ta.value='نرمال‌سازی می‌دهد c=2 و سپس از تابع بقا استفاده می‌کنم تا هر چهار بخش را حساب کنم.';
+      ta.dispatchEvent(new Event('input'));`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,900));`);
+    st = await cdp.eval(`return a1Status('p7')`);
+    truthy(st !== 'mastered', `checkpoint + writing gave "${st}"`);
+    // 3) add two solved variants
+    await cdp.eval(`
+      const bs=[...document.querySelectorAll('#a1Vars [data-a1v][data-v="done"]')];
+      bs[0].click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,250));`);
+    await cdp.eval(`
+      const bs=[...document.querySelectorAll('#a1Vars [data-a1v][data-v="done"]')];
+      bs[1].click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,400));`);
+    st = await cdp.eval(`return a1Status('p7')`);
+    eq(st, 'mastered', 'all three conditions met');
+  });
+  await check('assignment progress survives a reload', async () => {
+    await goto('#v-a1');
+    eq(await cdp.eval(`return a1Status('p7')`), 'mastered', 'state restored after reload');
+    truthy(await cdp.eval(`return /تسلط/.test(document.getElementById('a1List').innerText)`), 'shown on the dashboard');
+  });
+  await check('problem visualisations draw', async () => {
+    const bad = [];
+    for (const [id, sel] of [['p3', '#poisChart'], ['p5', '#densChart'],
+                             ['p6', '#trChart-p6'], ['p10', '#trChart-p10']]) {
+      await nav('#v-a1/' + id, 900);
+      const w = await cdp.eval(`const c=document.querySelector('${sel}'); return c?c.width:0;`);
+      if (!(w > 300)) bad.push(`${id}: canvas width ${w}`);
+    }
+    await nav('#v-a1/p11', 900);
+    const tree = await cdp.eval(`return document.querySelectorAll('#bayesTree rect').length`);
+    if (tree < 6) bad.push(`p11: bayes tree has ${tree} nodes`);
+    if (bad.length) throw new Error(bad.join(', '));
+  });
+  await check('the Poisson instrument reproduces the n = 17 answer', async () => {
+    await nav('#v-a1/p3', 900);
+    const out = await cdp.eval(`return document.querySelector('[data-pout]').innerText`);
+    truthy(/۱۷/.test(out), `expected the quantile 17 in the readout, got: ${out.replace(/\n/g, ' | ')}`);
+  });
+  await check('the Bayes slider reproduces the base-rate collapse', async () => {
+    await nav('#v-a1/p11', 900);
+    const post = await cdp.eval(`
+      const s=document.getElementById('bPrior'); s.value=0.01; s.dispatchEvent(new Event('input'));
+      const t=document.querySelector('[data-bout]').innerText;
+      return t;`);
+    truthy(/0\.50|0,50/.test(post.replace(/،/g, ',')), `posterior should fall to ~0.5, readout: ${post.replace(/\n/g, ' | ')}`);
+  });
+
+  /* ---- exam mode ---- */
+  G('exam mode');
+  await check('exam offers lengths and starts a paper', async () => {
+    await nav('#v-exam');
+    atLeast(await cdp.eval(`return document.querySelectorAll('[data-exam]').length`), 3, 'length options');
+    await cdp.eval(`document.querySelector('[data-exam="5,1"]').click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,500));`);
+    eq(await cdp.eval(`return document.querySelectorAll('#examHost .quiz').length`), 5, 'five MCQs');
+    eq(await cdp.eval(`return document.querySelectorAll('#examHost .ex').length`), 1, 'one open question');
+  });
+  await check('solutions stay hidden until the paper is submitted', async () => {
+    truthy(await cdp.eval(`return !document.querySelector('#examHost .fb')`), 'no feedback before submit');
+    // Structural, not textual: the intro paragraph legitimately contains the words
+    // "معیار بررسی" ("the criteria are shown after you submit"), so a text match
+    // reports a leak that is not there. The criteria render as a .def inside .ex.
+    eq(await cdp.eval(`return document.querySelectorAll('#examHost .ex .def').length`), 0,
+      'no marking-criteria block before submit');
+    eq(await cdp.eval(`return document.querySelectorAll('#examHost [data-es]').length`), 0,
+      'no self-assessment controls before submit');
+    truthy(await cdp.eval(`return document.querySelector('[data-examsubmit]').disabled`),
+      'submit disabled until every MCQ is answered');
+  });
+  await check('submitting grades the paper and names weak topics', async () => {
+    await cdp.eval(`
+      document.querySelectorAll('#examHost .quiz').forEach(q => {
+        const o = q.querySelector('.opt'); if (o) o.click();
+      });`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,600));`);
+    await cdp.eval(`document.querySelector('[data-examsubmit]').click();`);
+    await cdp.eval(`return new Promise(r=>setTimeout(r,600));`);
+    atLeast(await cdp.eval(`return document.querySelectorAll('#examHost .fb').length`), 5, 'feedback on every MCQ');
+    truthy(await cdp.eval(`return /بازخورد تشخیصی/.test(document.getElementById('examHost').innerText)`),
+      'diagnostic summary');
+    atLeast(await cdp.eval(`return document.querySelectorAll('#examHost .ex .def').length`), 1,
+      'marking criteria revealed after submit');
+    atLeast(await cdp.eval(`return document.querySelectorAll('#examHost [data-es]').length`), 3,
+      'self-assessment controls appear after submit');
+  });
+  await check('exam history is recorded and survives a reload', async () => {
+    await goto('#v-exam');
+    truthy(await cdp.eval(`return /عملکرد در طول زمان/.test(document.getElementById('examHost').innerText)`),
+      'history table present after reload');
+  });
+
   /* ---- progress persistence ---- */
   G('progress persistence');
   await check('answering a quiz question stores progress and shows diagnostic feedback', async () => {
@@ -494,8 +648,10 @@ try {
   await check('phone 390×844: no horizontal page scroll on any view', async () => {
     await setViewport(390, 844, true);
     const bad = [];
-    for (const v of ['', '#v-road', '#v-map', '#v-thm', '#v-pre', '#v-l1', '#v-q']) {
-      await goto(v);
+    await goto('');
+    for (const v of ['#v-dash', '#v-road', '#v-map', '#v-thm', '#v-pre', '#v-l1', '#v-q',
+                     '#v-a1', '#v-a1/p3', '#v-a1/p11', '#v-exam']) {
+      await nav(v, 300);
       const o = await cdp.eval(`return { sw: document.documentElement.scrollWidth, iw: window.innerWidth }`);
       if (o.sw > o.iw + 1) bad.push(`${v || '#v-dash'} (${o.sw} > ${o.iw})`);
     }
@@ -529,8 +685,9 @@ try {
   await check('direct URL access to every view works', async () => {
     await setViewport(1280, 900);
     const bad = [];
-    for (const id of ['v-dash', 'v-road', 'v-map', 'v-thm', 'v-pre', 'v-l1', 'v-q']) {
-      await goto('#' + id);
+    await goto('');
+    for (const id of ['v-dash', 'v-road', 'v-map', 'v-thm', 'v-pre', 'v-l1', 'v-q', 'v-a1', 'v-exam']) {
+      await nav('#' + id, 250);
       const shown = await cdp.eval(`return [...document.querySelectorAll('section.view')].filter(s => !s.hidden).map(s => s.id)`);
       if (shown.length !== 1 || shown[0] !== id) bad.push(`#${id} -> ${JSON.stringify(shown)}`);
     }

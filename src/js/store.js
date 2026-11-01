@@ -5,8 +5,8 @@ function loadLocal(){
 }
 function merge(o){
   if(!o || typeof o!=="object") return;
-  ["topics","quiz","ex","pre","thm","read"].forEach(function(k){
-    if(o[k] && typeof o[k]==="object") Object.assign(ST[k], o[k]);
+  ["topics","quiz","ex","pre","thm","read","a1","exam"].forEach(function(k){
+    if(o[k] && typeof o[k]==="object"){ ST[k] = ST[k] || {}; Object.assign(ST[k], o[k]); }
   });
 }
 function save(){

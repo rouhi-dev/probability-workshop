@@ -18,6 +18,7 @@ they are valid CDFs and tells you which condition they violate.
 ## Table of contents
 
 - [What it contains](#what-it-contains)
+- [Assignment 1 — deep problem solving](#assignment-1--deep-problem-solving)
 - [The three instruments](#the-three-instruments)
 - [Screens](#screens)
 - [Technology](#technology)
@@ -45,7 +46,8 @@ they are valid CDFs and tells you which condition they violate.
 | **Prerequisites** | 12 mathematical skills, each with why it is needed and what counts as knowing it. |
 | **Lesson 1** | Random experiments, sample space, events, σ-field — taught in 11 stages from intuition to independent exercises. |
 | **CDF question** | A full treatment of "can a function be discontinuous *and* decreasing?", including Froda's theorem, monotonicity and right-continuity of `F_X`, and the Lebesgue decomposition. |
-| **Assessment** | 10 recall questions with per-option diagnostic feedback, and 10 exercises with progressive hints and no answers. |
+| **Assignment 1** | All 11 problems of the course's first assignment, each with a full educational package, plus a 44-question generated bank and an exam mode. See below. |
+| **Assessment** | 21 auto-graded recall questions with per-option diagnostic feedback, 10 lesson exercises and 44 assignment variants — all with progressive hints and no revealed answers. |
 
 ### References
 
@@ -54,6 +56,65 @@ edition differs, the English section *title* is authoritative, not the number. N
 numbers are cited anywhere, because they vary between printings.
 
 ---
+
+## Assignment 1 — deep problem solving
+
+The course's first assignment (`stochastic_processes_assignment.pdf`, 3 pages, Autumn 1405) is
+built into the app as structured data. Every statement was extracted from the PDF's text layer
+**and checked against the rendered page images**; none was rewritten, normalised or "repaired".
+
+Each of the 11 problems carries:
+
+| Section | Contents |
+|---|---|
+| صورت سؤال | The original Persian statement, verbatim |
+| ابهام | An explicit note wherever the statement leaves an assumption unstated |
+| تحلیل مفهومی | What is being tested, the concepts, and live prerequisite status |
+| آموزش مبانی ریاضی | 3–5 collapsible foundation blocks, each deriving what the solution will use |
+| راهبرد حل | A route map — deliberately not a solution |
+| نمایش تعاملی | An instrument, for the five problems where one genuinely helps |
+| حل من | Your own notebook, saved locally |
+| حل تشریحی | The worked solution, **hidden behind an explicit reveal** |
+| بررسی و اعتبارسنجی | How to check the answer yourself, independently |
+| تفسیر، اشتباهات رایج، الگو | Meaning, 4–6 named errors, and the reusable pattern |
+| نقطهٔ بازبینی | One diagnostic MCQ that gates mastery |
+| تمرین‌های تکمیلی | 4 new questions at levels 1–4 |
+
+### Two findings about the source, stated rather than papered over
+
+- **Problem 4 contains no explicit joint CDF.** It reads «بر حسب $F_{XY}(x,y)$» — *in terms of*
+  $F_{XY}$. That is a well-posed general derivation, not a truncated statement, and the solution
+  stays symbolic. A test asserts no concrete joint CDF ever leaks into it.
+- **Problem 3(b) has a real unit ambiguity.** "Two days" against a rate of 144/year needs a year
+  convention; both are carried (365-day → 0.5457, 360-day → 0.5507) rather than silently picking one.
+
+Problems 8 and 10 carry ambiguity notes too: problem 8 is only a valid CDF for $a>0,\ c\ge0$, and
+problem 10's transform is **not unique** — infinitely many $g$ work, and uniqueness returns only
+under a monotonicity constraint.
+
+### Mastery, and what it is not
+
+A problem reaches **تسلط** only when all three hold: the diagnostic checkpoint is answered
+correctly, your own worked attempt is recorded (≥ 40 characters), and at least two of its four
+variants are marked solved. Clicking a button is never sufficient; `assignment.test.mjs` and a
+browser check both pin this down.
+
+### Coverage — what the assignment does *not* teach
+
+The assignment dashboard ends with a panel listing the eight syllabus areas it never touches
+(expectation and moments, general functions of a random variable, two random variables, limit
+theorems, the definition of a stochastic process, stationarity and spectra, linear systems with
+stochastic input, Markov chains and queueing). Finishing Assignment 1 makes you ready to *begin*
+stochastic processes, not ready for them — the UI says so explicitly, and a test enforces that the
+list stays populated and never overlaps the "covered" map.
+
+### Exam mode
+
+`#v-exam` draws a random paper from the bank with difficulty levels mixed: auto-graded
+multiple-choice drawn from the 11 checkpoints plus the lesson quizzes, and open-ended problems
+drawn from the 44 variants. Solutions and marking criteria stay hidden until submission, after
+which you get per-option diagnostic feedback, a ranked list of weak topics linked back to the
+relevant view, and a performance history.
 
 ## The three instruments
 
@@ -142,21 +203,27 @@ in `src/` and reloading the browser is the entire development loop.
 ```
 src/
   index.template.html      document shell for the web target (<head>, meta, fonts, MathJax)
+  views/assignment.html    assignment dashboard, problem workspace shell, exam mode
   styles.css               the single stylesheet — design tokens live at the top
   views/                   dashboard, roadmap, dependency map, theorems, prerequisites
   lessons/                 one HTML file per lesson
   data/                    curriculum content as plain data
     topics.js  roadmap.js  graph.js  theorems.js  prereqs.js  quizzes.js  exercises.js
+    assignment-a.js  assignment-b.js  assignment-c.js    the 11 problems, 4 per file group
+    assignment-map.js                                    curriculum coverage and gaps
   js/
     core.js                DOM helpers, Persian digits, shared state object
     store.js               persistence: localStorage, optional cloud sync
     mastery.js             the mastery rule — read it before changing progress logic
     nav.js  dashboard.js  roadmap.js  theorems.js  prereqs.js  quiz.js  exercises.js
     dep-graph.js           prerequisite-chain highlighting
-    main.js                boot order and hash routing
+    assignment.js          assignment dashboard, problem workspace, mastery rule
+    exam.js                random paper generation, grading, diagnostic feedback
+    main.js                boot order and hash routing (incl. #v-a1/<problem>)
     instruments/
       canvas.js            DPR-aware sizing and theme-token reads
-      experiment.js  venn.js  cdf.js   the three instruments
+      experiment.js  venn.js  cdf.js   the three lesson instruments
+      assignment-viz.js      Poisson quantile, density/CDF, transforms, Bayes tree
       wiring.js            binds instruments to the DOM
 tools/
   manifest.mjs             assembly order — the single source of truth
@@ -167,6 +234,7 @@ tools/
   verify-deploy.mjs        post-deployment checks against a live URL
 tests/
   _harness.mjs  data.test.mjs  math.test.mjs  mastery.test.mjs  build.test.mjs
+  assignment.test.mjs    content integrity + independent verification of every answer
 docs/                      BUILD OUTPUT — published by GitHub Pages, do not edit by hand
 ```
 

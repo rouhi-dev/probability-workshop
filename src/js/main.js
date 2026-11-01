@@ -1,15 +1,32 @@
 "use strict";
 /* ---------- boot ---------- */
+/* مسیریابی: "#v-a1/p3" یعنی نمای میزکار با پارامتر p3.
+   نماهای قدیمی ("#v-l1") بدون تغییر کار می‌کنند. */
+function hashParts(){
+  var raw = (location.hash || "").replace(/^#/, "");
+  if(!raw) return {view:"v-dash", param:null};
+  var bits = raw.split("/");
+  return {view:bits[0] || "v-dash", param:bits[1] || null};
+}
+function viewIdFromHash(){
+  var hp = hashParts();
+  if(hp.view === "v-a1" && hp.param) return "v-a1w";
+  return hp.view;
+}
 function renderAll(){
   renderNav(); renderDash(); renderRoad(); renderThm(); renderPre(); renderGraph();
   renderQuiz("quizL1"); renderQuiz("quizQ");
   renderEx("exL1"); renderEx("exQ");
+  renderA1Dash(); renderExam();
+  var hp = hashParts();
+  if(hp.view === "v-a1" && hp.param) renderA1Work(hp.param);
 }
 function redrawVisible(){
-  var h = location.hash;
+  var v = viewIdFromHash();
   if(typeof drawExp!=="function") return;
-  if(h==="#v-l1"){ drawExp(); renderVenn(); }
-  if(h==="#v-q"){ drawCdf(); }
+  if(v==="v-l1"){ drawExp(); renderVenn(); }
+  if(v==="v-q"){ drawCdf(); }
+  if(v==="v-a1w" && typeof drawPoisson==="function") drawA1Instruments(hashParts().param);
 }
 /* کدام مباحث با باز کردن یک درس «در حال یادگیری» می‌شوند.
    خواندن هرگز به «تسلط» نمی‌رسد — آن فقط از آزمون و تمرین می‌آید. */
@@ -23,7 +40,12 @@ function markViewRead(hash){
   return changed;
 }
 window.addEventListener("hashchange", function(){
-  if(markViewRead(location.hash)) renderDash();
+  if(markViewRead("#"+hashParts().view)) renderDash();
+  var hp = hashParts();
+  if(hp.view === "v-a1" && hp.param){
+    a1State(hp.param).read = 1; save();
+    renderA1Work(hp.param);
+  }
   renderNav();
   try{ window.scrollTo(0,0); }catch(e){}
   setTimeout(redrawVisible, 20);
@@ -40,7 +62,7 @@ $("#themeBtn").addEventListener("click", function(){
 try{ var th=localStorage.getItem(LSKEY+"-theme"); if(th) document.documentElement.setAttribute("data-theme",th); }catch(e){}
 $("#resetBtn").addEventListener("click", function(){
   if(!confirm("کل پیشرفت، پاسخ آزمون‌ها و متن تمرین‌ها پاک می‌شود. مطمئنید؟")) return;
-  ST = {topics:{},quiz:{},ex:{},pre:{},thm:{},read:{}};
+  ST = {topics:{},quiz:{},ex:{},pre:{},thm:{},read:{},a1:{},exam:{}};
   try{ localStorage.removeItem(LSKEY); }catch(e){}
   if(dbRef) dbRef.set({state:ST, at:new Date().toISOString()}).catch(function(){});
   renderAll();
@@ -48,7 +70,8 @@ $("#resetBtn").addEventListener("click", function(){
 /* ترتیب مهم است: اول پیشرفتِ ذخیره‌شده را بخوان، بعد رندر کن.
    اگر برعکس باشد، هر بار بارگذاری مجدد داشبورد خالی نشان می‌دهد. */
 loadLocal();
-markViewRead(location.hash);
+markViewRead("#"+hashParts().view);
+if(hashParts().view==="v-a1" && hashParts().param) a1State(hashParts().param).read = 1;
 renderAll();
 setTimeout(redrawVisible, 50);
 initPersistence();

@@ -4,7 +4,7 @@
    وضعیت، ذخیره‌سازی، ناوبری، رندر
    ============================================================ */
 var LSKEY = "prob-workshop-v1";
-var ST = { topics:{}, quiz:{}, ex:{}, pre:{}, thm:{}, read:{} };
+var ST = { topics:{}, quiz:{}, ex:{}, pre:{}, thm:{}, read:{}, a1:{}, exam:{} };
 var dbRef = null, saveTimer = null;
 
 function $(s,r){ return (r||document).querySelector(s); }
