@@ -613,7 +613,19 @@ try {
   if (!KEEP) rmSync(SHOTS, { recursive: true, force: true });
   if (pass !== results.length) process.exitCode = 1;
 } finally {
-  if (browser) browser.kill();
+  // Chrome keeps writing to its profile for a moment after SIGTERM, so removing
+  // the directory immediately races and throws ENOTEMPTY — which would fail the
+  // whole run after every check had already passed. Wait for exit, then retry.
+  if (browser && browser.exitCode === null) {
+    browser.kill();
+    await new Promise(resolve => {
+      const done = setTimeout(() => { try { browser.kill('SIGKILL'); } catch {} resolve(); }, 4000);
+      browser.once('exit', () => { clearTimeout(done); resolve(); });
+    });
+  }
   if (server) server.close();
-  if (profile) rmSync(profile, { recursive: true, force: true });
+  if (profile) {
+    try { rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 250 }); }
+    catch (e) { console.log(`  (left ${profile} behind: ${e.code})`); }
+  }
 }
