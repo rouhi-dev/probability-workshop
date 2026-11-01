@@ -9,7 +9,7 @@
  * Usage: node tools/browser-test.mjs [--keep-shots] [--url=https://…]
  * With --url it tests a deployed site instead of the local build.
  */
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -21,7 +21,22 @@ const KEEP = process.argv.includes('--keep-shots');
 const EXT_URL = (process.argv.find(a => a.startsWith('--url=')) || '').split('=')[1];
 const SHOTS = join(ROOT, 'build', 'screenshots');
 
-const BROWSERS = ['chromium', 'chromium-browser', 'google-chrome-stable', 'google-chrome'];
+const BROWSERS = ['chromium', 'chromium-browser', 'google-chrome-stable', 'google-chrome', 'chrome'];
+
+/** Find a usable Chromium. spawn().pid is truthy even when the binary does not
+ *  exist (ENOENT arrives asynchronously), so probe synchronously instead. */
+function findBrowser() {
+  const candidates = [process.env.CHROME_BIN, process.env.CHROME_PATH, ...BROWSERS].filter(Boolean);
+  for (const bin of candidates) {
+    try {
+      const v = execFileSync(bin, ['--version'], { stdio: ['ignore', 'pipe', 'ignore'], timeout: 10000 });
+      return { bin, version: v.toString().trim() };
+    } catch { /* not this one */ }
+  }
+  throw new Error(
+    'No Chromium-based browser found. Tried: ' + candidates.join(', ') +
+    '\nInstall one, or set CHROME_BIN to its path.');
+}
 
 /* ---------------- tiny CDP client over Node 22's global WebSocket ---------------- */
 class CDP {
@@ -109,7 +124,8 @@ try {
   let base = EXT_URL;
   if (!base) { server = await serve(8099, join(ROOT, 'docs'), false); base = 'http://127.0.0.1:8099/'; }
 
-  const bin = BROWSERS.find(b => { try { return spawn(b, ['--version']).pid; } catch { return false; } }) || 'chromium';
+  const { bin, version } = findBrowser();
+  console.log(`  using ${bin} — ${version}`);
   profile = mkdtempSync(join(tmpdir(), 'probws-'));
   browser = spawn(bin, [
     '--headless=new', '--remote-debugging-port=9333', '--no-sandbox', '--disable-gpu',
@@ -122,7 +138,10 @@ try {
   browser.stderr.on('data', d => browserLog.push(d.toString()));
   browser.on('exit', (code, sig) => browserLog.push(`\n[browser exited code=${code} signal=${sig}]`));
 
-  const cdp = await CDP.attach(9333);
+  const cdp = await CDP.attach(9333).catch(err => {
+    const log = browserLog.join('').split('\n').slice(-12).join('\n      ');
+    throw new Error(`${err.message}\n    browser stderr:\n      ${log}`);
+  });
   await cdp.send('Runtime.enable');
   await cdp.send('Network.enable');
   await cdp.send('Page.enable');

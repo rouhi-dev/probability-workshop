@@ -35,5 +35,24 @@ jobs:
       - name: Unit tests
         run: node tools/test.mjs
 
+      # ubuntu-latest ships Google Chrome; resolve it explicitly rather than
+      # relying on a binary name that differs between images.
+      - name: Locate a Chromium-based browser
+        run: |
+          BIN="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          if [ -z "$BIN" ]; then
+            echo "::error::no Chromium-based browser on the runner"; exit 1
+          fi
+          echo "CHROME_BIN=$BIN" >> "$GITHUB_ENV"
+          "$BIN" --version
+
       - name: Browser tests (headless Chromium)
         run: node tools/browser-test.mjs
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: build/screenshots/
+          if-no-files-found: ignore
