@@ -1,0 +1,37 @@
+<!-- ============ DASHBOARD ============ -->
+  <section class="view" id="v-dash">
+    <div class="viewhead">
+      <div class="eyebrow">DASHBOARD</div>
+      <h2>داشبورد یادگیری</h2>
+      <p class="lede">این صفحه وضعیت واقعی شما را نشان می‌دهد، نه چیزی که خوانده‌اید. هیچ مبحثی با «مطالعه کردم»
+      به حالت <b>تسلط</b> نمی‌رود؛ تسلط فقط با پاسخ درست به پرسش‌های یادآوری فعال و ثبت تمرین‌های حل‌شده باز می‌شود.</p>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:30px 0 2px">آمادگی برای ورود به فرآیندهای تصادفی</h3>
+    <p style="color:var(--ink-2);margin:4px 0 10px;max-width:62ch;font-size:14.4px">این شاخص وزن‌دار است: مباحثی که
+    پیش‌نیاز مستقیم فصل ۹ پاپولیس (<span class="en">General Concepts</span>) هستند وزن بیشتری دارند.</p>
+    <div id="readiness"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:34px 0 6px">وضعیت مبحث‌به‌مبحث</h3>
+    <div class="legend">
+      <span><i style="background:var(--line-2)"></i> شروع‌نشده</span>
+      <span><i style="background:var(--warn)"></i> در حال یادگیری</span>
+      <span><i style="background:var(--disc)"></i> نیازمند تمرین بیشتر</span>
+      <span><i style="background:var(--good)"></i> تسلط</span>
+    </div>
+    <div class="tlist" id="topicList"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:34px 0 6px">نقاط ضعف ریاضی — خودارزیابی</h3>
+    <p style="color:var(--ink-2);margin:4px 0 10px;max-width:62ch;font-size:14.4px">صادق باشید. هر موردی که
+    زیر ۳ بگذارید، در برنامهٔ روزانه برایش وقت رزرو می‌شود. این فهرست پیش‌نیازهای ریاضیِ واقعیِ فصل‌های ۲ و ۴ پاپولیس است.</p>
+    <div class="tlist" id="prereqList"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:34px 0 6px">تمرین‌های ثبت‌شده</h3>
+    <div class="scrollx"><table class="tbl" id="exTable"></table></div>
+
+    <div class="note" style="margin-top:26px"><span class="lbl">بازنشانی</span>
+      اگر خواستید از صفر شروع کنید: <button class="btn" id="resetBtn" type="button">پاک کردن کل پیشرفت</button>
+    </div>
+  </section>
