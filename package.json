@@ -1,0 +1,19 @@
+{
+  "name": "probability-workshop",
+  "version": "1.0.0",
+  "private": false,
+  "description": "An interactive Persian (RTL) learning environment for probability theory and random variables, following Papoulis & Pillai.",
+  "keywords": ["probability", "random-variables", "education", "persian", "rtl", "papoulis", "interactive", "mathjax"],
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "start": "node tools/build.mjs --quiet && node tools/serve.mjs --watch",
+    "serve": "node tools/serve.mjs",
+    "test": "node tools/build.mjs --quiet && node tools/test.mjs",
+    "test:browser": "node tools/build.mjs --quiet && node tools/browser-test.mjs",
+    "test:all": "npm run test && npm run test:browser",
+    "verify": "node tools/verify-deploy.mjs"
+  }
+}

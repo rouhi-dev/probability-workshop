@@ -1,0 +1,16 @@
+# build artefacts that are not the published site
+build/
+node_modules/
+*.log
+
+# editor / OS noise
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# never commit secrets
+.env
+.env.*
+*.pem
+*.key
