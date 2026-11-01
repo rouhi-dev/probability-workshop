@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>کارگاه احتمال و فرآیندهای تصادفی</title>
+<meta name="description" content="محیط یادگیری تعاملی نظریهٔ احتمال و متغیرهای تصادفی بر پایهٔ کتاب پاپولیس و پیلای — داشبورد پیشرفت، نقشهٔ راه، گراف وابستگی مفاهیم و میزکارهای تعاملی.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6F8F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1211" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Vazirmatn:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* پایهٔ کوچک — در نسخهٔ Artifact این بخش را میزبان فراهم می‌کند */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="stylesheet" href="styles.css">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] },
+  chtml: { scale: 1.05 }
+};
+</script>
+<script id="MathJax-script" defer src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<noscript>
+  <div style="max-width:620px;margin:48px auto;padding:20px;border:1px solid #C2CECB;border-radius:10px;
+              font-family:system-ui,sans-serif;direction:rtl;line-height:1.9">
+    <b>جاوااسکریپت غیرفعال است.</b><br>
+    این پلتفرم برای میزکارهای تعاملی (آزمایش تصادفی، دیاگرام ون، آزمایشگر CDF) و برای ذخیرهٔ پیشرفت
+    به جاوااسکریپت نیاز دارد. لطفاً آن را فعال کنید.
+  </div>
+</noscript>
+<!-- built 2026-11-01T02:18:26.501Z from src/ by tools/build.mjs — edit src/, not this file -->
+<div id="app">
+<div class="shell">
+
+<header class="topbar">
+  <div class="brand">
+    <h1>کارگاه احتمال و فرآیندهای تصادفی</h1>
+    <span class="sub">Papoulis &amp; Pillai · کارشناسی ارشد مخابرات</span>
+  </div>
+  <span class="spacer"></span>
+  <span class="sync" id="syncBadge">ذخیرهٔ پیشرفت: <b>در حال اتصال…</b></span>
+  <button class="chipbtn" id="themeBtn" type="button">حالت نمایش</button>
+</header>
+
+<div class="layout">
+  <nav class="rail" id="rail" aria-label="ناوبری درس‌ها"></nav>
+  <main id="main">
+
+<!-- ============ DASHBOARD ============ -->
+  <section class="view" id="v-dash">
+    <div class="viewhead">
+      <div class="eyebrow">DASHBOARD</div>
+      <h2>داشبورد یادگیری</h2>
+      <p class="lede">این صفحه وضعیت واقعی شما را نشان می‌دهد، نه چیزی که خوانده‌اید. هیچ مبحثی با «مطالعه کردم»
+      به حالت <b>تسلط</b> نمی‌رود؛ تسلط فقط با پاسخ درست به پرسش‌های یادآوری فعال و ثبت تمرین‌های حل‌شده باز می‌شود.</p>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:30px 0 2px">آمادگی برای ورود به فرآیندهای تصادفی</h3>
+    <p style="color:var(--ink-2);margin:4px 0 10px;max-width:62ch;font-size:14.4px">این شاخص وزن‌دار است: مباحثی که
+    پیش‌نیاز مستقیم فصل ۹ پاپولیس (<span class="en">General Concepts</span>) هستند وزن بیشتری دارند.</p>
+    <div id="readiness"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:34px 0 6px">وضعیت مبحث‌به‌مبحث</h3>
+    <div class="legend">
+      <span><i style="background:var(--line-2)"></i> شروع‌نشده</span>
+      <span><i style="background:var(--warn)"></i> در حال یادگیری</span>
+      <span><i style="background:var(--disc)"></i> نیازمند تمرین بیشتر</span>
+      <span><i style="background:var(--good)"></i> تسلط</span>
+    </div>
+    <div class="tlist" id="topicList"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:34px 0 6px">نقاط ضعف ریاضی — خودارزیابی</h3>
+    <p style="color:var(--ink-2);margin:4px 0 10px;max-width:62ch;font-size:14.4px">صادق باشید. هر موردی که
+    زیر ۳ بگذارید، در برنامهٔ روزانه برایش وقت رزرو می‌شود. این فهرست پیش‌نیازهای ریاضیِ واقعیِ فصل‌های ۲ و ۴ پاپولیس است.</p>
+    <div class="tlist" id="prereqList"></div>
+
+    <h3 style="font-family:var(--display);font-size:25px;margin:34px 0 6px">تمرین‌های ثبت‌شده</h3>
+    <div class="scrollx"><table class="tbl" id="exTable"></table></div>
+
+    <div class="note" style="margin-top:26px"><span class="lbl">بازنشانی</span>
+      اگر خواستید از صفر شروع کنید: <button class="btn" id="resetBtn" type="button">پاک کردن کل پیشرفت</button>
+    </div>
+  </section>
+
+<!-- ============ ROADMAP ============ -->
+  <section class="view" id="v-road" hidden>
+    <div class="viewhead">
+      <div class="eyebrow">14-DAY PLAN</div>
+      <h2>نقشهٔ راه چهارده‌روزه</h2>
+      <p class="lede">هر روز ۱۸۰ دقیقه، با ساختار ثابت: ۱۰۰ دقیقه مفهوم و اثبات، ۵۰ دقیقه حل مسئله،
+      ۳۰ دقیقه ریاضیِ پایه. روزهای ۷ و ۱۴ آزمون جامع‌اند و مبحث جدید ندارند.</p>
+    </div>
+
+    <div class="bench">
+      <header><h4>بودجهٔ زمانی هر روز</h4><span class="tag">180 min</span></header>
+      <div class="pad">
+        <div style="display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--line-2)">
+          <div style="flex:100;background:var(--cont-soft);display:grid;place-items:center;font-size:12px;color:var(--cont);font-weight:600">مفهوم و اثبات · 100′</div>
+          <div style="flex:50;background:var(--disc-soft);display:grid;place-items:center;font-size:12px;color:var(--disc);font-weight:600">حل مسئله · 50′</div>
+          <div style="flex:30;background:var(--warn-soft);display:grid;place-items:center;font-size:11px;color:var(--warn);font-weight:600">ریاضی · 30′</div>
+        </div>
+        <p style="font-size:13.4px;color:var(--ink-2);margin:10px 0 0">نسبت ۱۰۰/۵۰/۳۰ عمدی است: با پیش‌زمینهٔ شما،
+        اگر بیش از نیمی از وقت صرف خواندن شود، مهارت حل مسئله ساخته نمی‌شود. اگر روزی کم‌وقت شدید،
+        <b>بخش حل مسئله را حذف نکنید</b>؛ بخش مفهوم را کوتاه کنید.</p>
+      </div>
+    </div>
+
+    <div class="scrollx" style="margin-top:18px"><table class="tbl" id="roadTable"></table></div>
+
+    <div class="note"><span class="lbl">دربارهٔ ارجاع‌ها</span>
+      شماره‌گذاری فصل‌ها و بخش‌ها بر اساس ویرایش چهارم کتاب پاپولیس و پیلای است. اگر ویرایش شما متفاوت است،
+      <b>عنوان انگلیسی بخش</b> را مبنا بگیرید نه شماره را. هیچ شمارهٔ صفحه‌ای در این پلتفرم ذکر نشده،
+      چون بین ویرایش‌ها و چاپ‌ها تغییر می‌کند.
+    </div>
+  </section>
+
+<!-- ============ DEPENDENCY MAP ============ -->
+  <section class="view" id="v-map" hidden>
+    <div class="viewhead">
+      <div class="eyebrow">CONCEPT DEPENDENCIES</div>
+      <h2>نقشهٔ وابستگی مفاهیم</h2>
+      <p class="lede">احتمال یک فهرست موضوعی نیست؛ یک گراف جهت‌دار است. روی هر گره بزنید تا
+      <b>تمام زنجیرهٔ پیش‌نیازهای آن</b> روشن شود. اگر در مبحثی گیر کردید، تقریباً همیشه مشکل در یکی از اجدادِ آن گره است، نه در خودش.</p>
+    </div>
+    <div class="bench">
+      <header><h4>گراف پیش‌نیازها</h4><span class="tag">یال = «لازم است برای»</span></header>
+      <div class="pad" style="padding:0">
+        <div class="scrollx" style="border:0;border-radius:0"><svg id="depgraph" width="760" height="1020" role="img" aria-label="گراف وابستگی مفاهیم احتمال"></svg></div>
+      </div>
+    </div>
+    <div id="nodeInfo"></div>
+  </section>
+
+<!-- ============ THEOREMS ============ -->
+  <section class="view" id="v-thm" hidden>
+    <div class="viewhead">
+      <div class="eyebrow">PROOF INVENTORY</div>
+      <h2>قضیه‌هایی که باید بتوانم اثبات کنم</h2>
+      <p class="lede">این فهرست، معیار سنجش شماست. تا پایان دو هفته باید بتوانید هر ردیف را
+      <b>روی کاغذ سفید و بدون نگاه کردن</b> اثبات کنید. ستون «وضعیت» را خودتان علامت بزنید، اما صادقانه:
+      «بلدم» یعنی نوشته‌اید، نه اینکه اثبات را خوانده و تأیید کرده‌اید.</p>
+    </div>
+    <div class="note"><span class="lbl">دو قضیهٔ تمرینیِ استاد</span>
+      از چهار قضیهٔ حاصل از اصول کلموگروف، استاد دو مورد را اثبات کرده و دو مورد را تمرین داده است.
+      ردیف‌های <span class="pill mid">تمرین استاد</span> در فهرست زیر همان‌هایی هستند که معمولاً به دانشجو واگذار می‌شوند
+      (یکنوایی و قاعدهٔ اجتماع). پاسخ آن‌ها را اینجا نمی‌بینید — فقط راهنمای گام‌به‌گام.
+    </div>
+    <div id="thmList"></div>
+  </section>
+
+<!-- ============ MATH PREREQS ============ -->
+  <section class="view" id="v-pre" hidden>
+    <div class="viewhead">
+      <div class="eyebrow">MATHEMATICAL PREREQUISITES</div>
+      <h2>پیش‌نیازهای ریاضی</h2>
+      <p class="lede">این‌ها مهارت‌هایی هستند که بدونشان رسیدن به سطح ارشد ممکن نیست — و خبر خوب اینکه
+      تعدادشان کم است. هدف، «مرور حساب دیفرانسیل و انتگرال» نیست؛ فقط همین چند ابزار است که در فصل‌های ۲ و ۴ واقعاً به کار می‌آیند.</p>
+    </div>
+    <div id="preCards"></div>
+  </section>
+
+  <!-- ============ LESSON 1 ============ -->
+  <section class="view" id="v-l1" hidden>
+    <div class="viewhead">
+      <div class="eyebrow">LESSON 01 · روز ۱ · Papoulis Ch. 1 &amp; 2</div>
+      <h2>آزمایش تصادفی، فضای نمونه، پیشامد</h2>
+      <p class="lede">هدف این درس حفظ کردن سه تعریف نیست. هدف این است که بتوانید یک مسئلهٔ مخابراتی مبهم را
+      به یک <b>سه‌گانهٔ دقیق</b> $(S,\mathcal{F},P)$ ترجمه کنید — چون هر خطای حل مسئله در احتمال، تقریباً همیشه
+      خطا در همین ترجمه است، نه در محاسبه.</p>
+    </div>
+
+    <div class="prose">
+
+      <div class="step">۱ / ۱۱ — شهود: این مفهوم چه مشکلی را حل می‌کند؟</div>
+      <h3>چرا بدون فضای نمونه، کلمهٔ «احتمال» بی‌معناست</h3>
+      <p>این جمله را در نظر بگیرید: «احتمال خطا ۰٫۰۱ است.» این جمله، به‌تنهایی، <b>هیچ معنای ریاضی ندارد</b>.
+      خطا در چه چیزی؟ در یک بیت؟ در یک بستهٔ ۱۰۰۰ بیتی؟ در یک فریم؟ احتمال $10^{-2}$ برای بیت،
+      با احتمال $10^{-2}$ برای بسته، دو دنیای کاملاً متفاوت‌اند.</p>
+      <p>مشکل این است که «احتمال» یک <b>تابع</b> است و هر تابع برای معنا داشتن به یک <b>دامنه</b> نیاز دارد.
+      دامنهٔ احتمال، مجموعه‌ای از پیشامدهاست؛ و پیشامدها زیرمجموعه‌هایی از یک «جهانِ ممکن‌ها» هستند.
+      آن جهان، همان <b>فضای نمونه</b> است. پس ترتیب منطقی برعکس چیزی است که در ذهن بیشتر دانشجوها هست:</p>
+      <div class="def">
+        <span class="lbl">ترتیب درست</span>
+        اول آزمایش را مشخص می‌کنیم ← بعد فضای نمونه $S$ را می‌نویسیم ← بعد مشخص می‌کنیم چه زیرمجموعه‌هایی
+        «پیشامد» حساب می‌شوند ($\mathcal{F}$) ← و تنها در انتها، تابع $P$ را روی آن‌ها تعریف می‌کنیم.
+        <b>هیچ‌وقت از وسط شروع نکنید.</b>
+      </div>
+      <p>پاپولیس در فصل ۱ (<span class="en">The Meaning of Probability</span>) دقیقاً روی همین نکته وقت می‌گذارد:
+      او سه موضع را از هم جدا می‌کند — تعریف کلاسیک (شمارش حالت‌های هم‌شانس)، تفسیر فراوانی نسبی
+      (<span class="en">relative frequency</span>)، و تعریف اصل‌موضوعی (<span class="en">axiomatic</span>).
+      فصل ۲ (<span class="en">The Axioms of Probability</span>) سپس موضع سوم را به‌عنوان بنیان ریاضی انتخاب می‌کند.
+      دو تای اول «تعریف» نیستند؛ یکی روش محاسبه است و دیگری توجیه فیزیکی.</p>
+
+      <div class="step">۲ / ۱۱ — تعریف صوری</div>
+      <h3>سه‌گانهٔ آزمایش تصادفی</h3>
+      <div class="def">
+        <span class="lbl">DEFINITION · آزمایش تصادفی</span>
+        یک <b>آزمایش تصادفی</b> (<span class="en">random experiment</span>) با سه‌گانهٔ $(S,\mathcal{F},P)$ مشخص می‌شود:
+        <ol style="margin:8px 0 0">
+          <li>$S$ — <b>فضای نمونه</b> (<span class="en">sample space</span>): مجموعهٔ همهٔ برون‌دادهای ممکن،
+          به‌طوری‌که در هر اجرای آزمایش <b>دقیقاً یکی</b> از آن‌ها رخ دهد.</li>
+          <li>$\mathcal{F}$ — یک <b>میدان</b> یا <b>میدان بورل</b> (<span class="en">field / Borel field, σ-field</span>)
+          از زیرمجموعه‌های $S$: آن دسته از زیرمجموعه‌ها که «پیشامد» نامیده می‌شوند و $P$ روی آن‌ها معنا دارد.</li>
+          <li>$P$ — یک <b>تابع احتمال</b> $P:\mathcal{F}\to[0,1]$ که اصول موضوعهٔ کلموگروف را برآورده کند.</li>
+        </ol>
+      </div>
+      <p>یک برون‌داد تکی را پاپولیس با $\zeta$ (زتا) نشان می‌دهد، پس $\zeta \in S$. این نماد را به خاطر بسپارید:
+      در فصل ۴ کتاب، متغیر تصادفی را به شکل $X(\zeta)$ می‌نویسد و اگر $\zeta$ برایتان ناشناس باشد،
+      آن فصل ناگهان گیج‌کننده می‌شود.</p>
+      <div class="def">
+        <span class="lbl">DEFINITION · پیشامد</span>
+        یک <b>پیشامد</b> (<span class="en">event</span>) عضوی از $\mathcal{F}$ است، یعنی زیرمجموعه‌ای
+        $A \subseteq S$ که به آن احتمال نسبت داده می‌شود. می‌گوییم «$A$ رخ داد» اگر برون‌دادِ مشاهده‌شدهٔ
+        آزمایش، $\zeta$، عضو $A$ باشد: $\zeta \in A$.
+      </div>
+      <p>دو پیشامد خاص: $S$ خودش پیشامد است و <b>پیشامد حتمی</b> (<span class="en">certain event</span>) نام دارد،
+      چون $\zeta \in S$ همیشه برقرار است. و $\varnothing$ پیشامد است و <b>پیشامد ناممکن</b>
+      (<span class="en">impossible event</span>) نام دارد، چون $\zeta \in \varnothing$ هرگز برقرار نیست.</p>
+
+      <div class="step">۳ / ۱۱ — نماد به نماد</div>
+      <h3>هر علامت چه می‌گوید</h3>
+      <div class="scrollx"><table class="tbl">
+        <thead><tr><th>نماد</th><th>خوانده می‌شود</th><th>معنای دقیق</th></tr></thead>
+        <tbody>
+          <tr><td class="n">$S$</td><td>فضای نمونه</td><td>مجموعه‌ای از اشیاء. خودش عدد نیست و احتمال هم نیست.</td></tr>
+          <tr><td class="n">$\zeta$</td><td>زتا، برون‌داد</td><td>یک عضو از $S$. نتیجهٔ <i>یک</i> اجرای آزمایش.</td></tr>
+          <tr><td class="n">$\zeta \in A$</td><td>زتا عضو A است</td><td>رابطهٔ «عضویت». بین یک <b>عضو</b> و یک <b>مجموعه</b>.</td></tr>
+          <tr><td class="n">$A \subseteq S$</td><td>A زیرمجموعهٔ S</td><td>رابطهٔ «شامل‌بودن». بین <b>دو مجموعه</b>. با $\in$ اشتباه نشود.</td></tr>
+          <tr><td class="n">$\mathcal{F}$</td><td>میدان رویدادها</td><td>مجموعه‌ای که <b>اعضایش خودشان مجموعه‌اند</b> (خانوادهٔ زیرمجموعه‌ها).</td></tr>
+          <tr><td class="n">$A \in \mathcal{F}$</td><td>A یک پیشامد است</td><td>چون اعضای $\mathcal{F}$ زیرمجموعه‌های $S$ هستند، اینجا $\in$ درست است نه $\subseteq$.</td></tr>
+          <tr><td class="n">$\bar{A}$ یا $A^{c}$</td><td>متمم A</td><td>$\{\zeta \in S : \zeta \notin A\}$ — «A رخ نداد».</td></tr>
+          <tr><td class="n">$A \cup B$</td><td>اجتماع</td><td>«$A$ رخ داد <b>یا</b> $B$ رخ داد (یا هر دو)».</td></tr>
+          <tr><td class="n">$A \cap B$ یا $AB$</td><td>اشتراک</td><td>«$A$ <b>و</b> $B$ هر دو رخ دادند». پاپولیس اغلب $AB$ می‌نویسد.</td></tr>
+          <tr><td class="n">$A \cap B=\varnothing$</td><td>ناسازگار</td><td><b>ناسازگاری / جدا از هم</b> (<span class="en">mutually exclusive, disjoint</span>): نمی‌توانند با هم رخ دهند.</td></tr>
+          <tr><td class="n">$P(A)$</td><td>احتمال A</td><td>یک <b>عدد حقیقی</b> در $[0,1]$. ورودی‌اش مجموعه است، خروجی‌اش عدد.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="warnbox"><span class="lbl">پرتکرارترین خطای نمادی</span>
+        نوشتن $P(\zeta)$ به‌جای $P(\{\zeta\})$. تابع $P$ روی <b>مجموعه‌ها</b> عمل می‌کند، نه روی برون‌دادها.
+        $\{\zeta\}$ یک مجموعهٔ تک‌عضوی است و پیشامد حساب می‌شود؛ $\zeta$ یک عضو است و احتمال ندارد.
+        در امتحان این تفاوت شاید بخشوده شود، اما در فصل ۴ وقتی به $P\{X \le x\}$ می‌رسید، همین سهل‌انگاری
+        باعث می‌شود نفهمید چرا شرط اندازه‌پذیری لازم است.
+      </div>
+
+      <div class="step">۴ / ۱۱ — درک عمیق</div>
+      <h3>چرا $\mathcal{F}$ لازم است؟ چرا «همهٔ زیرمجموعه‌ها» کافی نیست؟</h3>
+      <p>اگر $S$ متناهی یا شمارا باشد، می‌توان $\mathcal{F} = 2^{S}$ (مجموعهٔ همهٔ زیرمجموعه‌ها) گرفت و
+      هیچ مشکلی پیش نمی‌آید. پس چرا اصلاً این مؤلفهٔ سوم را وارد تعریف می‌کنیم؟</p>
+      <p>چون به محض اینکه $S$ <b>ناشمارا</b> شود — و در مخابرات این حالت عادی است: زمان ورود بسته، دامنهٔ نویز،
+      تأخیر کانال — ثابت می‌شود که نمی‌توان به <i>همهٔ</i> زیرمجموعه‌های $S$ احتمال نسبت داد
+      و همزمان جمع‌پذیری شمارا را حفظ کرد. یعنی خانوادهٔ $2^{S}$ بیش از حد بزرگ است.
+      پس باید خانوادهٔ کوچک‌تری انتخاب کنیم که دو شرط داشته باشد: به اندازهٔ کافی بزرگ باشد که
+      همهٔ پیشامدهای مورد علاقهٔ ما را در بر بگیرد، و به اندازهٔ کافی «خوش‌رفتار» باشد که $P$ روی آن سازگار بماند.</p>
+      <div class="def">
+        <span class="lbl">DEFINITION · میدان σ</span>
+        خانوادهٔ $\mathcal{F}$ از زیرمجموعه‌های $S$ یک <b>میدان σ</b> است اگر:
+        <br>(الف) $S \in \mathcal{F}$؛
+        <br>(ب) اگر $A \in \mathcal{F}$ آنگاه $\bar{A} \in \mathcal{F}$ (بسته تحت متمم)؛
+        <br>(ج) اگر $A_1, A_2, \dots \in \mathcal{F}$ آنگاه $\bigcup_{i=1}^{\infty} A_i \in \mathcal{F}$ (بسته تحت اجتماع شمارا).
+      </div>
+      <p>معنای شهودی این سه شرط، مهندسی است و نه انتزاعی: اگر بتوانم بپرسم «آیا $A$ رخ داد؟»، باید بتوانم بپرسم
+      «آیا رخ <i>نداد</i>؟» و «آیا یکی از این دنبالهٔ پیشامدها رخ داد؟». $\mathcal{F}$ دقیقاً مجموعهٔ
+      <b>پرسش‌هایی است که سیستم اندازه‌گیری من می‌تواند جواب دهد</b>، و شرط‌ها می‌گویند این مجموعه
+      باید تحت عملیات منطقی بسته باشد.</p>
+      <details class="proof"><summary>قضیهٔ کوچک — اثبات کنید: $\mathcal{F}$ تحت اشتراک هم بسته است</summary>
+        <div class="body">
+          <p><b>گزاره.</b> اگر $A,B \in \mathcal{F}$ آنگاه $A\cap B \in \mathcal{F}$.</p>
+          <p><b>راهبرد اثبات.</b> در تعریف میدان σ هیچ اشاره‌ای به اشتراک نشده — فقط متمم و اجتماع.
+          پس باید اشتراک را <b>از دل همین دو عمل بسازیم</b>. ابزار این کار قانون دمورگان است.
+          این الگو («عملی که در تعریف نیست را با عمل‌های موجود بساز») یکی از سه‌چهار تکنیک اصلی
+          اثبات در تمام این درس است.</p>
+          <ol>
+            <li>فرض: $A \in \mathcal{F}$ و $B \in \mathcal{F}$.</li>
+            <li>از شرط (ب): $\bar{A} \in \mathcal{F}$ و $\bar{B} \in \mathcal{F}$.</li>
+            <li>از شرط (ج) با $A_1=\bar A$، $A_2=\bar B$ و $A_i = \varnothing$ برای $i\ge 3$
+            (توجه: $\varnothing = \bar{S} \in \mathcal{F}$ از (الف) و (ب)):
+            $\;\bar{A} \cup \bar{B} \in \mathcal{F}$.</li>
+            <li>دوباره از شرط (ب): $\overline{\bar{A} \cup \bar{B}} \in \mathcal{F}$.</li>
+            <li>قانون دمورگان: $\overline{\bar{A} \cup \bar{B}} = A \cap B$.</li>
+            <li>پس $A\cap B \in \mathcal{F}$.</li>
+          </ol>
+          <p class="qed">■</p>
+          <p style="color:var(--muted);font-size:13px">دقت کنید گام ۳ چرا لازم بود: شرط (ج) دربارهٔ اجتماع
+          <b>شمارای نامتناهی</b> حرف می‌زند، نه دو تایی. برای استفاده از آن، دنبالهٔ دوعضوی را با
+          $\varnothing$ به دنبالهٔ نامتناهی تبدیل کردیم. این «پُرکردن با تهی» ترفندی است که در اثبات
+          اصل موضوع سوم کلموگروف برای حالت متناهی هم دقیقاً همین‌طور به کار می‌رود.</p>
+        </div>
+      </details>
+
+      <h3>یک دقت که معمولاً از دست می‌رود: $S$ یکتا نیست</h3>
+      <p>برای یک آزمایش فیزیکیِ واحد، چند فضای نمونهٔ کاملاً معتبر وجود دارد. «دو سکه را می‌اندازیم» را ببینید:</p>
+      <ul>
+        <li><b>مدل ۱:</b> $S_1 = \{\text{شش},\ \text{شخ},\ \text{خش},\ \text{خخ}\}$ — چهار برون‌داد،
+        برای سکهٔ سالم <b>هم‌احتمال</b>.</li>
+        <li><b>مدل ۲:</b> $S_2 = \{0,1,2\}$ (تعداد شیرها) — سه برون‌داد، <b>هم‌احتمال نیست</b>:
+        $P(\{1\}) = 1/2$ در حالی که $P(\{0\})=P(\{2\})=1/4$.</li>
+      </ul>
+      <div class="warnbox"><span class="lbl">ریشهٔ یک خطای کلاسیک</span>
+        اگر مدل ۲ را انتخاب کنید و بعد ناخودآگاه فرمول احتمال کلاسیک $P(A)=|A|/|S|$ را به کار ببرید،
+        به $1/3$ می‌رسید که غلط است. فرمول $|A|/|S|$ <b>یک قضیه نیست، یک فرض است</b>:
+        فقط وقتی معتبر است که مدل‌سازی شما برون‌دادهای هم‌شانس تولید کرده باشد.
+        پس هنگام حل مسئله، اول از خودتان بپرسید: «آیا اعضای $S$ که نوشتم هم‌احتمال‌اند؟»
+      </div>
+
+      <div class="step">۵ / ۱۱ — نمایش تعاملی</div>
+      <h3>میزکار ۱ — آزمایش، فضای نمونه، پیشامد، و فراوانی نسبی</h3>
+      <p>یک آزمایش انتخاب کنید. اعضای $S$ به‌صورت کلید ظاهر می‌شوند؛ روی هرکدام بزنید تا آن برون‌داد را
+      <b>داخل پیشامد $A$</b> بگذارید یا بیرون بیاورید. بعد آزمایش را اجرا کنید و ببینید
+      $\hat{P}(A) = n_A/n$ چطور حول $P(A)$ نوسان می‌کند. این همان بحث فصل ۱ پاپولیس است:
+      فراوانی نسبی <b>تعریفِ</b> احتمال نیست، بلکه رفتاری است که اصول موضوعه آن را <i>نتیجه می‌دهند</i>
+      (قضیهٔ برنولی، فصل ۳).</p>
+      <div class="bench" id="expBench">
+        <header>
+          <h4>آزمایشگاه آزمایش تصادفی</h4>
+          <span class="tag">S · A · relative frequency</span>
+        </header>
+        <div class="pad">
+          <div class="row" id="expPicker"></div>
+          <div style="margin-top:14px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:3px">فضای نمونه
+              <span class="en">S</span> — روی برون‌دادها بزنید تا پیشامد <span class="en">A</span> ساخته شود</div>
+            <div id="expOutcomes"></div>
+          </div>
+          <div id="expPresets" class="row" style="margin-top:10px"></div>
+          <div style="margin-top:12px;font-size:13.6px;background:var(--surface-2);border:1px solid var(--line);
+               border-radius:8px;padding:9px 12px" id="expSetNote"></div>
+          <div class="row" style="margin-top:13px">
+            <button class="btn primary" data-run="1" type="button">یک اجرا</button>
+            <button class="btn" data-run="20" type="button">۲۰ اجرا</button>
+            <button class="btn" data-run="200" type="button">۲۰۰ اجرا</button>
+            <button class="btn" data-run="2000" type="button">۲۰۰۰ اجرا</button>
+            <button class="btn" id="expReset" type="button">بازنشانی شمارنده</button>
+          </div>
+          <div class="readout" id="expReadout"></div>
+          <div class="cvswrap" style="margin-top:14px"><canvas id="expChart" height="230"></canvas></div>
+          <p style="font-size:12.6px;color:var(--muted);margin:8px 0 0">محور افقی: تعداد اجراها $n$ (مقیاس لگاریتمی).
+          محور عمودی: $\hat{P}(A)=n_A/n$. خط افقی: مقدار نظری $P(A)$. نوار روشن: بازهٔ
+          $P(A) \pm 2\sqrt{P(A)(1-P(A))/n}$ — یعنی همان $\pm 2\sigma$ که در فصل ۳ از توزیع دوجمله‌ای می‌آید.
+          توجه کنید که نوار <b>باریک می‌شود</b> ولی به صفر نمی‌رسد: همگرایی با نرخ $1/\sqrt{n}$ است، نه سریع‌تر.</p>
+        </div>
+      </div>
+
+      <h3>میزکار ۲ — جبر پیشامدها، و تفاوت ناسازگاری با استقلال</h3>
+      <p>شکل بالا (دایره‌ها) <b>شماتیک</b> است و مساحت‌هایش متناسب با احتمال نیست — به‌عنوان نقشهٔ منطقی بخوانیدش.
+      نوار پایین <b>دقیق</b> است: در آن، طول هر قطعه برابر احتمال واقعی همان ناحیه است. هر دو را با هم ببینید.</p>
+      <div class="bench" id="vennBench">
+        <header><h4>دیاگرام ون و نوار مساحت دقیق</h4><span class="tag">set algebra · exact measure</span></header>
+        <div class="pad">
+          <div class="row" id="vennOps"></div>
+          <div class="cvswrap" style="margin-top:12px"><svg id="vennSvg" width="420" height="250" role="img" aria-label="دیاگرام ون پیشامدهای A و B"></svg></div>
+          <div id="vennExpr" style="font-size:14.4px;margin-top:4px"></div>
+          <div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px">اعداد را تغییر دهید
+              — قید $\max(0,\,P(A)+P(B)-1) \le P(A\cap B) \le \min(P(A),P(B))$ به‌صورت خودکار اعمال می‌شود</div>
+            <div class="row">
+              <label class="ctl">P(A) = <span class="v" id="vPAv"></span><input type="range" id="vPA" min="0" max="1" step="0.01" value="0.5"></label>
+              <label class="ctl">P(B) = <span class="v" id="vPBv"></span><input type="range" id="vPB" min="0" max="1" step="0.01" value="0.4"></label>
+              <label class="ctl">P(A∩B) = <span class="v" id="vPABv"></span><input type="range" id="vPAB" min="0" max="1" step="0.01" value="0.2"></label>
+            </div>
+            <div class="cvswrap" style="margin-top:12px"><svg id="barSvg" width="640" height="118" role="img" aria-label="نوار مساحت دقیق احتمال"></svg></div>
+            <div class="readout" id="vennReadout"></div>
+            <div id="vennVerdict" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="note"><span class="lbl">این میزکار را رها نکنید تا این را ببینید</span>
+        $P(A)$ و $P(B)$ را روی مقادیر مثبت بگذارید و بعد $P(A\cap B)$ را به صفر برسانید.
+        خواهید دید که برچسب «<b>ناسازگار</b>» روشن می‌شود و همزمان «<b>مستقل</b>» خاموش. چرا؟
+        چون $P(A\cap B)=0$ در حالی که $P(A)P(B)>0$. پس:
+        <b>دو پیشامد با احتمال مثبت که ناسازگارند، قطعاً وابسته‌اند.</b> در درس ۳ این را اثبات می‌کنیم؛
+        الآن فقط ببینیدش.
+      </div>
+
+      <div class="step">۶ / ۱۱ — مثال‌های حل‌شده، از ساده به سخت</div>
+      <h3>چهار مدل‌سازی که باید بتوانید بنویسید</h3>
+      <h4>مثال ۱ (پایه) — ارسال یک بیت روی کانال دودویی</h4>
+      <p>یک بیت می‌فرستیم، یک بیت می‌گیریم. برون‌داد شامل <b>هر دو</b> است:
+      $S = \{(0,0),(0,1),(1,0),(1,1)\}$ که زوج $(x,y)$ یعنی «$x$ فرستادم، $y$ گرفتم».
+      پیشامد خطا: $E = \{(0,1),(1,0)\}$. توجه کنید $|S|=4$ ولی این چهار برون‌داد
+      <b>هم‌احتمال نیستند</b> (چون احتمال خطا کوچک است)، پس $|E|/|S| = 1/2$ کاملاً بی‌معناست.</p>
+      <h4>مثال ۲ (متوسط) — سه بیت</h4>
+      <p>$S=\{0,1\}^3$، یعنی $S=\{000,001,\dots,111\}$ و $|S|=2^3=8$ (الگوی $\{0,1\}^n$ را به خاطر بسپارید).
+      پیشامد «حداقل دو بیت خطا» را به‌صورت مجموعه بنویسید؛ در حالتی که ۱ یعنی خطا:
+      $A=\{011,101,110,111\}$ و $|A|=4$. به‌صورت منطقی: $A = \{\zeta : w(\zeta)\ge 2\}$ که $w$ وزن همینگ است.
+      <b>نکتهٔ مهم:</b> اینجا هم هم‌احتمالی برقرار نیست؛ ولی نوشتن $A$ به‌صورت مجموعه، <i>مستقل از</i> $P$ است.
+      این جداسازی را همیشه حفظ کنید: اول مجموعه، بعد احتمال.</p>
+      <h4>مثال ۳ (مفهومی) — تعداد کاربران فعال</h4>
+      <p>$S = \{0,1,2,3,\dots\} = \mathbb{Z}_{\ge 0}$: <b>شمارای نامتناهی</b>.
+      هنوز می‌توان به تک‌تک اعضا احتمال مثبت داد، چون یک سری نامتناهی می‌تواند مجموعش $1$ شود
+      (مثلاً پواسون: $P(\{k\}) = e^{-\lambda}\lambda^{k}/k!$ و $\sum_k P(\{k\}) = 1$).
+      اینجا $\mathcal{F}=2^{S}$ بی‌خطر است.</p>
+      <h4>مثال ۴ (سطح ارشد) — زمان ورود یک بستهٔ داده</h4>
+      <p>$S = [0,\infty)$: <b>ناشمارا</b>. حالا یک استدلال کلیدی:</p>
+      <div class="def"><span class="lbl">استدلال</span>
+      فرض کنید به هر تک‌نقطه احتمالی مثبت و یکسان $c>0$ بدهیم. در بازهٔ $[0,1]$ بی‌شمار نقطه هست،
+      پس برای هر $n$ می‌توان $n$ نقطهٔ مجزا انتخاب کرد؛ از جمع‌پذیری، احتمال اجتماع آن‌ها $nc$ است
+      که برای $n > 1/c$ از ۱ بیشتر می‌شود — تناقض با اصل موضوع دوم. پس <b>ناگزیر</b>
+      $P(\{\zeta\})=0$ برای هر تک‌نقطه، در حالی که $P([0,1])>0$.
+      </div>
+      <p>نتیجهٔ تکان‌دهنده و درست: در حالت پیوسته، پیشامدی با احتمال صفر می‌تواند
+      <b>ناممکن نباشد</b>. «احتمال صفر» و «ناممکن» دو چیز متفاوت‌اند. این دقیقاً همان دلیلی است که
+      در جلسهٔ دوم گفته شد PMF برای متغیر پیوسته مناسب نیست — و همین‌جاست که در درس‌های ۱۰ و ۱۱
+      به PDF می‌رسیم. (پاپولیس، فصل ۴، بخش <span class="en">Distribution and Density Functions</span>.)</p>
+
+      <div class="step">۷ / ۱۱ — اثبات</div>
+      <h3>سه اثبات کوتاه که باید بتوانید بنویسید</h3>
+      <details class="proof"><summary>اثبات ۱ — پیشامد ناممکن عضو هر میدان σ است</summary>
+        <div class="body">
+          <p><b>گزاره.</b> برای هر میدان σ، داریم $\varnothing \in \mathcal{F}$.</p>
+          <p><b>راهبرد.</b> تعریف چیزی دربارهٔ $\varnothing$ نمی‌گوید، پس باید از چیزی که <i>می‌گوید</i> بسازیمش.</p>
+          <ol><li>از شرط (الف): $S \in \mathcal{F}$.</li>
+          <li>از شرط (ب) با $A=S$: $\bar{S} \in \mathcal{F}$.</li>
+          <li>اما $\bar S = \{\zeta\in S:\zeta\notin S\} = \varnothing$.</li></ol>
+          <p class="qed">■ — توجه: این اثبات هیچ ربطی به $P$ ندارد. اینکه $P(\varnothing)=0$ یک گزارهٔ
+          <b>جداگانه</b> است که از اصول کلموگروف می‌آید، نه از ساختار $\mathcal{F}$. این دو را قاطی نکنید.</p>
+        </div>
+      </details>
+      <details class="proof"><summary>اثبات ۲ — قانون دمورگان برای پیشامدها (با تفسیر احتمالی)</summary>
+        <div class="body">
+          <p><b>گزاره.</b> $\overline{A \cup B} = \bar A \cap \bar B$.</p>
+          <p><b>راهبرد.</b> تساوی دو مجموعه را با <b>دوطرفه نشان دادن عضویت</b> ثابت می‌کنیم:
+          یک $\zeta$ دلخواه بگیریم و نشان دهیم عضویت در طرف چپ، <i>معادل</i> عضویت در طرف راست است.</p>
+          <ol>
+            <li>$\zeta \in \overline{A\cup B}$ &nbsp;⟺&nbsp; نادرست است که $\zeta\in A\cup B$.</li>
+            <li>&nbsp;⟺&nbsp; نادرست است که ($\zeta\in A$ یا $\zeta \in B$).</li>
+            <li>&nbsp;⟺&nbsp; ($\zeta\notin A$ و $\zeta\notin B$) &nbsp;— نقیض «یا» می‌شود «و»ی نقیض‌ها.</li>
+            <li>&nbsp;⟺&nbsp; $\zeta\in\bar A$ و $\zeta\in\bar B$ &nbsp;⟺&nbsp; $\zeta \in \bar A\cap\bar B$.</li>
+          </ol>
+          <p>تفسیر مخابراتی: «هیچ‌یک از دو کاربر فرستنده نبود» دقیقاً معادل «کاربر اول نفرستاد و کاربر دوم هم نفرستاد».
+          این بدیهی به نظر می‌رسد، اما همین قانون است که در درس ۵ اجازه می‌دهد
+          $P(\text{حداقل یکی}) = 1-P(\text{هیچ‌کدام})$ را بنویسیم، که پرکاربردترین ترفند حل مسئله در کل درس است.</p>
+          <p class="qed">■</p>
+        </div>
+      </details>
+      <details class="proof"><summary>اثبات ۳ — تجزیهٔ هر اجتماع به اجتماعی ناسازگار (ابزار کلیدی)</summary>
+        <div class="body">
+          <p><b>گزاره.</b> برای هر دو پیشامد: $A \cup B = A \cup (\bar A \cap B)$، و این دو مجموعه ناسازگارند.</p>
+          <p><b>چرا اهمیت دارد؟</b> اصل موضوع سوم کلموگروف فقط برای پیشامدهای <b>ناسازگار</b> جمع‌پذیری می‌دهد.
+          پس هر وقت بخواهید احتمال یک اجتماعِ غیرناسازگار را حساب کنید، <b>اول باید آن را به قطعات ناسازگار بشکنید</b>.
+          این لم، ابزار آن کار است — و پایهٔ اثبات قاعدهٔ $P(A\cup B)=P(A)+P(B)-P(A\cap B)$ (که تمرین استاد است).</p>
+          <ol>
+            <li><b>ناسازگاری:</b> $A \cap (\bar A \cap B) = (A\cap\bar A)\cap B = \varnothing \cap B = \varnothing$. ✓</li>
+            <li><b>$\subseteq$ :</b> اگر $\zeta\in A\cup B$، دو حالت دارد. اگر $\zeta\in A$، در طرف راست هست.
+            اگر $\zeta\notin A$، آنگاه حتماً $\zeta\in B$ و پس $\zeta\in \bar A\cap B$. ✓</li>
+            <li><b>$\supseteq$ :</b> هر دو $A$ و $\bar A\cap B$ زیرمجموعهٔ $A\cup B$ هستند (دومی چون $\bar A \cap B \subseteq B$). ✓</li>
+          </ol>
+          <p class="qed">■</p>
+          <p style="color:var(--muted);font-size:13px">گام بعدی را خودتان بردارید: با همین لم،
+          $P(A\cup B) = P(A) + P(\bar A\cap B)$ و بعد لازم است $P(\bar A \cap B)$ را به
+          $P(B)-P(A\cap B)$ ربط دهید. آن تکه، تمرین ۱-۵ در پایین همین صفحه است.</p>
+        </div>
+      </details>
+
+      <div class="step">۸ / ۱۱ — تصورات غلط</div>
+      <h3>پنج خطایی که باید در خودتان شکار کنید</h3>
+      <div class="scrollx"><table class="tbl">
+        <thead><tr><th style="width:38%">باور غلط</th><th>چرا غلط است</th></tr></thead>
+        <tbody>
+          <tr><td>«فضای نمونهٔ هر آزمایش یکتاست.»</td>
+              <td>نه. $S$ محصول <b>مدل‌سازی</b> شماست. دو سکه را دیدید: $\{$شش،شخ،خش،خخ$\}$ یا $\{0,1,2\}$.
+              هر دو درست‌اند؛ اما فقط اولی هم‌احتمال است.</td></tr>
+          <tr><td>«$P(A)=|A|/|S|$ تعریف احتمال است.»</td>
+              <td>این فقط یک <b>مدل خاص</b> است که فرض هم‌شانسی را تحمیل می‌کند. در مثال ارسال بیت،
+              استفاده از آن به احتمال خطای ۵۰٪ می‌رسد که فاجعه است.</td></tr>
+          <tr><td>«احتمال صفر یعنی ناممکن.»</td>
+              <td>در فضای ناشمارا غلط است. $P(\{\zeta\})=0$ برای هر تک‌نقطه، ولی آزمایش <i>بالاخره</i>
+              یکی از آن‌ها را برمی‌گرداند. ناممکن یعنی $A=\varnothing$؛ احتمال صفر یعنی $P(A)=0$.
+              دومی از اولی نتیجه نمی‌شود.</td></tr>
+          <tr><td>«پیشامدهای ناسازگار مستقل‌اند — هر دو یعنی بی‌ربط.»</td>
+              <td>برعکسِ کامل. ناسازگاری یک رابطهٔ <b>مجموعه‌ای</b> است ($A\cap B=\varnothing$)
+              و استقلال یک رابطهٔ <b>احتمالی</b> ($P(A\cap B)=P(A)P(B)$). ناسازگاری یعنی وقوع یکی
+              وقوع دیگری را <b>ردّ</b> می‌کند — این شدیدترین نوع وابستگی است.</td></tr>
+          <tr><td>«احتمال، حدِ فراوانی نسبی است.»</td>
+              <td>پاپولیس در فصل ۱ نشان می‌دهد که این تفسیر نمی‌تواند <b>تعریف</b> باشد:
+              عبارت «$\lim n_A/n$» خودش به مفهوم همگرایی احتمالی نیاز دارد و استدلال دوری می‌شود.
+              در چارچوب اصل‌موضوعی، رابطهٔ $n_A/n \to P(A)$ یک <b>قضیه</b> است (قضیهٔ برنولی، فصل ۳).</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="step">۹ / ۱۱ — کاربرد مخابراتی</div>
+      <h3>کانال دودویی متقارن، به زبان $(S,\mathcal{F},P)$</h3>
+      <p>کانال دودویی متقارن (<span class="en">BSC — Binary Symmetric Channel</span>) با احتمال وارونگی $p$:
+      یک بیت می‌فرستیم، و کانال با احتمال $p$ آن را برمی‌گرداند.</p>
+      <ul>
+        <li><b>$S$</b> $=\{(x,y): x,y\in\{0,1\}\}$، چهار برون‌داد.</li>
+        <li><b>$\mathcal{F}=2^{S}$</b> (۱۶ پیشامد) — چون $S$ متناهی است، بی‌دردسر.</li>
+        <li><b>$P$</b>: با $P(X=0)=q$ و تقارن کانال،
+        $P(\{(0,1)\}) = qp$، $P(\{(0,0)\})=q(1-p)$، $P(\{(1,0)\})=(1-q)p$، $P(\{(1,1)\})=(1-q)(1-p)$.</li>
+        <li><b>پیشامد خطا</b> $E=\{(0,1),(1,0)\}$؛ از جمع‌پذیری روی برون‌دادهای ناسازگار:
+        $P(E) = qp+(1-q)p = p$. پس احتمال خطای بیت مستقل از $q$ است — نتیجه‌ای که تقارن کانال تضمین می‌کند.</li>
+      </ul>
+      <p>حالا دقت کنید که این ساختار، کل بحث آشکارسازی را ممکن می‌کند: «چه چیزی فرستاده شده بود،
+      وقتی ۱ گرفتم؟» یعنی $P(X=1 \mid Y=1)$ — که احتمال شرطی است (درس ۳) و محاسبه‌اش قضیهٔ بیز است (درس ۵).
+      اما بدون نوشتن درستِ $S$ در همین قدم اول، آن محاسبه‌ها معنا ندارند.</p>
+
+      <div class="step">۱۰ / ۱۱ — یادآوری فعال</div>
+      <h3>آزمون درس ۱</h3>
+      <p>بدون برگشتن به بالا جواب دهید. هر گزینه بازخورد اختصاصی دارد و خطای استدلالی‌تان را نام می‌برد.
+      <b>برای رسیدن به حالت «تسلط» در این مبحث، باید ۵ از ۶ را درست بزنید</b> و حداقل سه تمرین را ثبت کنید.</p>
+      <div id="quizL1"></div>
+
+      <div class="step">۱۱ / ۱۱ — تمرین مستقل</div>
+      <h3>تمرین‌های درس ۱</h3>
+      <p>پاسخ این‌ها در پلتفرم نیست و نخواهد بود. راهنمایی‌ها پله‌پله باز می‌شوند — <b>تا گیر واقعی نکرده‌اید
+      راهنمایی بعدی را باز نکنید</b>. پاسخ خود را در کادر بنویسید (ذخیره می‌شود) و بعد در گفت‌وگو برایم بفرستید
+      تا استدلالتان را بررسی کنم.</p>
+      <div id="exL1"></div>
+    </div>
+  </section>
+
+  <!-- ============ PROFESSOR'S QUESTION ============ -->
+  <section class="view" id="v-q" hidden>
+    <div class="viewhead">
+      <div class="eyebrow">OPEN QUESTION · Papoulis Ch. 4</div>
+      <h2>پرسش استاد: تابعی ناپیوسته و نزولی؟</h2>
+      <p class="lede">«دیدیم تابعی که ناپیوسته بود، صعودی بود. آیا حالتی هست که تابعی هم ناپیوسته باشد و هم نزولی؟»
+      پاسخ کوتاه: <b>بله، به‌سادگی — اما هرگز نه برای یک CDF.</b> و تمام ارزش این پرسش در فهمیدن
+      این است که چرا آن دو جمله با هم ناسازگار نیستند.</p>
+    </div>
+
+    <div class="prose">
+      <h3>گام ۰ — پرسش را به دو پرسش بشکنیم</h3>
+      <p>در صورت‌بندی اصلی، دو چیز در هم تنیده شده‌اند. اولین کار یک ریاضی‌خوان، جدا کردن آن‌هاست:</p>
+      <ol>
+        <li><b>پرسش الف (دربارهٔ توابع دلخواه):</b> آیا تابعی $g:\mathbb{R}\to\mathbb{R}$ وجود دارد که
+        هم نزولی باشد و هم ناپیوسته؟</li>
+        <li><b>پرسش ب (دربارهٔ CDF‌ها):</b> آیا $F_X$ ای وجود دارد که در جایی نزولی باشد، یا در جایی
+        <b>پرش رو به پایین</b> داشته باشد؟</li>
+      </ol>
+      <p>پاسخ الف <b>بله</b> است و پاسخ ب <b>نه</b>. مشاهدهٔ کلاس («ناپیوسته بود و صعودی») یک
+      واقعیت دربارهٔ <i>CDF</i>ها بود، نه یک قضیه دربارهٔ توابع. اگر این دو را از هم جدا نکنیم،
+      به این نتیجهٔ غلط می‌رسیم که «ناپیوستگی به‌نحوی صعودی‌بودن را ایجاب می‌کند» — که کاملاً نادرست است.</p>
+
+      <h3>پاسخ الف — بله، و یک مثال نقضِ یک‌خطی</h3>
+      <div class="def"><span class="lbl">مثال نقض</span>
+        $g(x) = -\lfloor x \rfloor$ که $\lfloor \cdot \rfloor$ جزء صحیح است.
+        این تابع <b>ناصعودی</b> است (یعنی $x_1<x_2 \Rightarrow g(x_1)\ge g(x_2)$) و در هر عدد صحیح
+        یک <b>پرش رو به پایین</b> به اندازهٔ $1$ دارد. پس هم نزولی است و هم ناپیوسته.
+      </div>
+      <p>حتی نزدیک‌تر به درس خودمان: اگر $F$ یک CDF گسستهٔ پله‌ای باشد، تابع
+      $G(x) = 1 - F(x) = P\{X > x\}$ — که در مهندسی به آن <b>تابع بقا</b>
+      (<span class="en">survival / complementary CDF, CCDF</span>) می‌گویند و در تحلیل قابلیت اطمینان مستقیماً
+      به کار می‌رود — ناصعودی و پله‌ای است. پس شما در همین درس، با یک تابع نزولی و ناپیوسته کار خواهید کرد.</p>
+      <p>به‌طور کلی‌تر، <b>یکنوایی و ناپیوستگی دو خصوصیت مستقل از هم‌اند</b>. چیزی که یکنوایی
+      تضمین می‌کند این است:</p>
+      <div class="def"><span class="lbl">THEOREM (Froda) · قضیهٔ فرودا</span>
+        اگر $g$ روی یک بازه یکنوا باشد (<b>فرقی نمی‌کند صعودی یا نزولی</b>)، آنگاه:
+        <br>(۱) در هر نقطه، حدهای یک‌طرفهٔ $g(x^{-})$ و $g(x^{+})$ <b>وجود دارند</b>؛
+        <br>(۲) هر ناپیوستگی لزوماً از نوع <b>پرشی</b> (<span class="en">jump discontinuity</span>) است —
+        ناپیوستگی نوسانی یا اساسی ممکن نیست؛
+        <br>(۳) مجموعهٔ نقاط ناپیوستگی <b>حداکثر شمارا</b> است.
+      </div>
+      <details class="proof"><summary>اثبات (۳) — چرا نقاط ناپیوستگی حداکثر شمارا هستند</summary>
+        <div class="body">
+          <p>فرض کنیم $g$ صعودی است (برای نزولی، $-g$ را در نظر بگیرید).</p>
+          <ol>
+            <li>چون $g$ صعودی است، $g(x^-) = \sup_{t<x} g(t)$ و $g(x^+) = \inf_{t>x} g(t)$ وجود دارند
+            و $g(x^-) \le g(x) \le g(x^+)$.</li>
+            <li>$g$ در $x$ ناپیوسته است اگر و تنها اگر $g(x^-) < g(x^+)$؛ یعنی بازهٔ باز
+            $I_x = \big(g(x^-),\,g(x^+)\big)$ ناتهی باشد.</li>
+            <li><b>گام کلیدی:</b> اگر $x_1 < x_2$ دو نقطهٔ ناپیوستگی باشند، آنگاه
+            $g(x_1^+) \le g(x_2^-)$ (چون $g$ صعودی است و بین $x_1$ و $x_2$ نقطه‌ای وجود دارد).
+            پس $I_{x_1}$ و $I_{x_2}$ <b>مجزا</b> هستند.</li>
+            <li>هر بازهٔ باز ناتهی حداقل یک <b>عدد گویا</b> دارد
+            (چگالی $\mathbb{Q}$ در $\mathbb{R}$). یک عدد گویا از هر $I_x$ انتخاب کنید:
+            چون بازه‌ها مجزا هستند، این انتخاب <b>یک‌به‌یک</b> است.</li>
+            <li>پس یک نگاشت یک‌به‌یک از مجموعهٔ نقاط ناپیوستگی به $\mathbb{Q}$ ساختیم.
+            چون $\mathbb{Q}$ شمارا است، دامنه هم حداکثر شمارا است.</li>
+          </ol>
+          <p class="qed">■</p>
+          <p style="color:var(--muted);font-size:13px">این اثبات را یاد بگیرید: الگوی «به هر عضو یک گویای یکتا
+          نسبت بده تا شمارایی ثابت شود» در سراسر نظریهٔ اندازه تکرار می‌شود.</p>
+        </div>
+      </details>
+      <p>نتیجهٔ مهم برای ما: پله‌ای‌بودن نمودار CDF گسسته، <b>از یکنوایی می‌آید</b>، نه از گسسته‌بودن.
+      و همین قضیه تضمین می‌کند که یک CDF هرگز نمودار «دیوانه‌وار» ندارد — فقط پله.</p>
+
+      <h3>پاسخ ب — نه. یک CDF نمی‌تواند هیچ‌جا نزولی باشد</h3>
+      <div class="def"><span class="lbl">DEFINITION · تابع توزیع تجمعی</span>
+        برای متغیر تصادفی $X$ روی $(S,\mathcal{F},P)$:
+        $F_X(x) \;=\; P\{X \le x\} \;=\; P\big(\{\zeta \in S : X(\zeta) \le x\}\big),\qquad x\in\mathbb{R}.$
+        (این همان قراردادِ پاپولیس در فصل ۴ است: با $\le$، نه با $<$.)
+      </div>
+      <details class="proof"><summary>قضیه ۱ — $F_X$ ناکاهشی است (پس هیچ پرش رو به پایین ندارد)</summary>
+        <div class="body">
+          <p><b>گزاره.</b> اگر $x_1 < x_2$ آنگاه $F_X(x_1) \le F_X(x_2)$.</p>
+          <p><b>راهبرد.</b> خودِ اعداد را مقایسه نکنید؛ <b>پیشامدها</b> را مقایسه کنید.
+          یکنوایی $F$ یک گزارهٔ تحلیلی نیست، بازتابِ یک رابطهٔ <i>شامل‌بودن مجموعه‌ای</i> است.</p>
+          <ol>
+            <li>بگذارید $A_1 = \{\zeta: X(\zeta)\le x_1\}$ و $A_2 = \{\zeta: X(\zeta)\le x_2\}$.</li>
+            <li>اگر $X(\zeta)\le x_1$ و $x_1<x_2$، آنگاه $X(\zeta)\le x_2$. پس $A_1 \subseteq A_2$.</li>
+            <li><b>لم یکنوایی احتمال:</b> اگر $A\subseteq B$ آنگاه $P(A)\le P(B)$.
+            اثبات: $B = A \cup (B\cap\bar A)$ و این دو ناسازگارند، پس از اصل سوم
+            $P(B)=P(A)+P(B\cap\bar A)$؛ و از اصل اول $P(B\cap\bar A)\ge 0$؛ پس $P(B)\ge P(A)$.</li>
+            <li>با اعمال لم: $P(A_1)\le P(A_2)$، یعنی $F_X(x_1)\le F_X(x_2)$.</li>
+          </ol>
+          <p class="qed">■</p>
+          <div class="note" style="margin:10px 0 0"><span class="lbl">دقت کنید کجا از کجا آمد</span>
+            تنها چیزی که در این اثبات به کار رفت، <b>اصل موضوع اول (نامنفی‌بودن)</b> و
+            <b>اصل موضوع سوم (جمع‌پذیری)</b> بود. پس ناکاهشی‌بودن CDF یک <i>قرارداد</i> یا یک
+            <i>مشاهدهٔ تجربی</i> نیست؛ یک نتیجهٔ منطقی اجتناب‌ناپذیر از اصول کلموگروف است.
+            برای همین هیچ آزمایش تصادفی‌ای در عالم نمی‌تواند CDF نزولی تولید کند.
+          </div>
+        </div>
+      </details>
+      <p>از قضیهٔ ۱ به‌طور خودکار نتیجه می‌شود که <b>اندازهٔ هر پرش، نامنفی است</b>:</p>
+      <div class="def"><span class="lbl">اندازهٔ پرش = جرم احتمال</span>
+        $F_X(a) - F_X(a^{-}) \;=\; P\{X = a\} \;\ge\; 0 .$
+        پس پرش‌ها نه‌تنها رو به بالا هستند، بلکه <b>معنای فیزیکی</b> دارند: ارتفاع پرش در $a$،
+        دقیقاً همان جرم احتمالی است که در نقطهٔ $a$ متمرکز شده. اگر $X$ پیوسته باشد، همهٔ این پرش‌ها صفرند
+        و نمودار بدون پله است.
+      </div>
+
+      <h3>و نکتهٔ ظریف‌تر: چرا <i>راست</i>-پیوسته و نه چپ-پیوسته؟</h3>
+      <p>اینجا جایی است که بیشتر دانشجوها فقط حفظ می‌کنند. اما این یک انتخاب دلبخواهی نیست؛
+      <b>نتیجهٔ مستقیم قرارداد $\le$ در تعریف است</b>.</p>
+      <details class="proof"><summary>قضیه ۲ — $F_X$ از راست پیوسته است: $F_X(a^{+}) = F_X(a)$</summary>
+        <div class="body">
+          <p><b>ابزار لازم (پیوستگی از بالای $P$).</b> اگر $B_1 \supseteq B_2 \supseteq \cdots$ دنبالهٔ
+          نزولی پیشامدها با $\bigcap_{n} B_n = B$ باشد، آنگاه $P(B_n) \to P(B)$.
+          این خودش از جمع‌پذیری <b>شمارا</b> (اصل سوم در شکل کاملش) نتیجه می‌شود — و همین‌جا معلوم می‌شود
+          چرا کلموگروف به جمع‌پذیری شمارا نیاز داشت و جمع‌پذیری متناهی کافی نبود.</p>
+          <ol>
+            <li>دنبالهٔ $x_n \downarrow a$ بگیرید، یعنی $x_n > a$ و $x_n \to a$ (مثلاً $x_n = a + 1/n$).</li>
+            <li>$B_n = \{\zeta : X(\zeta) \le x_n\}$. چون $x_n$ نزولی است، $B_n$ دنبالهٔ نزولی پیشامدهاست.</li>
+            <li><b>گام حساس:</b> $\bigcap_{n=1}^{\infty} B_n = \{\zeta : X(\zeta) \le a\}$.
+              <br>دلیل $\supseteq$: اگر $X(\zeta)\le a$ آنگاه $X(\zeta)\le x_n$ برای همهٔ $n$. ✓
+              <br>دلیل $\subseteq$: اگر $X(\zeta)\le x_n$ برای <i>همهٔ</i> $n$، آنگاه با حد گرفتن
+              $X(\zeta) \le \lim x_n = a$. ✓ &nbsp;<b>و این‌جاست که $\le$ کار می‌کند:</b>
+              نامساوی غیراکید تحت حدگیری حفظ می‌شود.</li>
+            <li>از پیوستگی از بالا: $F_X(x_n) = P(B_n) \to P\{X\le a\} = F_X(a)$.</li>
+            <li>چون این برای هر دنبالهٔ $x_n\downarrow a$ برقرار است، $F_X(a^+) = F_X(a)$.</li>
+          </ol>
+          <p class="qed">■</p>
+          <div class="warnbox" style="margin:10px 0 0"><span class="lbl">حالا ببینید از چپ چرا شکست می‌خورد</span>
+            اگر $x_n \uparrow a$ (از چپ)، آنگاه $\bigcup_n \{X \le x_n\} = \{X < a\}$ — توجه کنید
+            <b>اکید</b>. پس $F_X(a^{-}) = P\{X < a\}$ که لازم نیست با $P\{X\le a\}$ برابر باشد؛
+            اختلافشان دقیقاً $P\{X=a\}$ است. پس:
+            $F_X(a) - F_X(a^-) = P\{X=a\}$
+            و اگر $X$ در $a$ جرم داشته باشد، $F_X$ در $a$ <b>چپ-پیوسته نیست</b>.
+            <br><br>اگر کسی CDF را به‌صورت $\tilde F(x)=P\{X<x\}$ تعریف کند (قراردادی که در بعضی متون روسی دیده می‌شود)،
+            دقیقاً برعکس می‌شود: $\tilde F$ <b>چپ</b>-پیوسته است. پس راست‌پیوستگی خاصیتی از دنیا نیست،
+            <b>نتیجهٔ منطقی قرارداد نمادگذاری است</b>. پاپولیس قرارداد $\le$ را به کار می‌برد.
+          </div>
+        </div>
+      </details>
+      <div class="def"><span class="lbl">THEOREM · مشخصه‌سازی کامل CDF</span>
+        تابع $F:\mathbb{R}\to\mathbb{R}$ CDF یک متغیر تصادفی است <b>اگر و تنها اگر</b> هر سه شرط را داشته باشد:
+        <br>(۱) <b>ناکاهشی</b>: $x_1<x_2 \Rightarrow F(x_1)\le F(x_2)$؛
+        <br>(۲) <b>راست‌پیوسته</b>: $F(x^{+}) = F(x)$ برای هر $x$؛
+        <br>(۳) <b>حدها</b>: $\displaystyle\lim_{x\to-\infty}F(x)=0$ و $\displaystyle\lim_{x\to+\infty}F(x)=1$.
+        <br><br>جهت «اگر» (ساختن یک متغیر تصادفی از هر $F$ با این سه خاصیت) نتیجهٔ قضیهٔ گسترش
+        لِبِگ–اشتیلتیس است و فراتر از این درس — اما دانستنش مهم است، چون نشان می‌دهد این سه شرط
+        <b>نه کمتر و نه بیشتر</b> از تمام محتوای مفهوم «توزیع» هستند.
+      </div>
+
+      <h3>میزکار — آزمایشگر CDF</h3>
+      <p>یک تابع انتخاب کنید. پلتفرم هر سه شرط را <b>عددی بررسی می‌کند</b> و می‌گوید کدام را نقض می‌کند.
+      نقطه‌چین عمودی را جابه‌جا کنید تا در نقاط پرش، دایرهٔ <b>تو‌پُر</b> (مقدار $F(a)$، از راست) و دایرهٔ
+      <b>تو‌خالی</b> (مقدار $F(a^-)$، از چپ) را ببینید. اختلاف این دو، همان $P\{X=a\}$ است.
+      با بزرگ‌نمایی، راست‌پیوستگی را به چشم ببینید: هر چه بیشتر زوم کنید، شاخهٔ راست به نقطهٔ تو‌پُر چسبیده می‌ماند،
+      در حالی که شاخهٔ چپ پایین می‌ایستد.</p>
+      <div class="bench" id="cdfBench">
+        <header><h4>آزمایشگر شرط‌های CDF</h4><span class="tag">monotone · right-continuous · limits</span></header>
+        <div class="pad">
+          <div class="row" id="cdfPicker"></div>
+          <div class="cvswrap" style="margin-top:14px"><canvas id="cdfChart" height="290"></canvas></div>
+          <div class="row" style="margin-top:12px">
+            <label class="ctl">نقطهٔ بررسی&nbsp; a = <span class="v" id="cdfAv"></span>
+              <input type="range" id="cdfA" min="-3" max="3" step="0.05" value="1"></label>
+            <label class="ctl">بزرگ‌نمایی حول a&nbsp; <span class="v" id="cdfZv"></span>
+              <input type="range" id="cdfZ" min="0" max="100" step="1" value="0"></label>
+          </div>
+          <div class="readout" id="cdfReadout"></div>
+          <div id="cdfVerdict" style="margin-top:13px"></div>
+          <div id="cdfWhy" style="margin-top:11px;font-size:13.8px"></div>
+        </div>
+      </div>
+
+      <h3>سه نکتهٔ سطح ارشد که همین‌جا باید اضافه شوند</h3>
+      <h4>۱. تعداد پرش‌ها می‌تواند نامتناهی باشد</h4>
+      <p>قضیهٔ فرودا گفت «حداکثر شمارا»، نه «متناهی». مثال: $X$ که روی اعداد گویای $[0,1]$ مقدار می‌گیرد
+      با احتمال‌هایی که مجموعشان ۱ است. CDF آن در <b>بی‌شمار</b> نقطه پرش دارد و با این حال
+      کاملاً معتبر است: ناکاهشی، راست‌پیوسته، با حدهای درست.</p>
+      <h4>۲. CDF پیوسته ⇏ وجود PDF</h4>
+      <div class="warnbox"><span class="lbl">این را در جلسهٔ آینده ممکن است بپرسند</span>
+        توابع توزیعی وجود دارند که <b>همه‌جا پیوسته‌اند</b> (پس هیچ جرم نقطه‌ای ندارند، $P\{X=a\}=0$ برای هر $a$)
+        و با این حال <b>چگالی ندارند</b> — مشهورترینش توزیع کانتور
+        (<span class="en">Cantor / singular continuous distribution</span>) است که مشتقش تقریباً همه‌جا صفر است
+        ولی از ۰ به ۱ می‌رسد. پس تقسیم‌بندی «گسسته یا پیوسته» که در جلسهٔ دوم دیدید،
+        در حالت کلی <b>جامع نیست</b>. عبارت دقیق این است:
+        <br><br>$X$ را <b>پیوسته مطلق</b> (<span class="en">absolutely continuous</span>) می‌نامیم اگر
+        $F_X(x)=\int_{-\infty}^{x} f_X(u)\,du$ برای یک $f_X \ge 0$ برقرار باشد. فقط <i>آن‌وقت</i> PDF وجود دارد.
+        در عمل مهندسی تقریباً همیشه با این حالت سر و کار داریم، اما جملهٔ درست را بلد باشید.
+      </div>
+      <h4>۳. تجزیهٔ هر CDF</h4>
+      <p>هر CDF را می‌توان به‌صورت ترکیب محدبی از سه جزء نوشت (<span class="en">Lebesgue decomposition</span>):
+      $F = \alpha_1 F_{\text{گسسته}} + \alpha_2 F_{\text{پیوستهٔ مطلق}} + \alpha_3 F_{\text{تکین}},
+      \qquad \alpha_i\ge 0,\ \textstyle\sum\alpha_i=1 .$
+      در مخابرات، جزء سوم تقریباً همیشه صفر است، اما جزء اول و دوم <b>با هم</b> فراوان‌اند:
+      مثلاً تأخیر صف وقتی صف خالی باشد با احتمال مثبت صفر است (جرم نقطه‌ای در $0$) و در غیر این صورت پیوسته —
+      یعنی یک متغیر تصادفی <b>آمیخته</b> (<span class="en">mixed</span>) با CDF‌ای که در صفر پرش دارد
+      و بعد از آن صعود هموار. در گزینهٔ «آمیخته» میزکار بالا، همین را می‌بینید.</p>
+
+      <h3>جمع‌بندی پاسخ، در پنج خط قابل گفتن در کلاس</h3>
+      <div class="def"><span class="lbl">پاسخ نهایی</span>
+        <ol style="margin:4px 0 0">
+          <li>بله، تابع ناپیوسته و نزولی فراوان است؛ $-\lfloor x\rfloor$ یا تابع بقای $1-F(x)$.</li>
+          <li>چیزی که یکنوایی تضمین می‌کند این است که ناپیوستگی‌ها فقط <b>پرشی</b> و <b>حداکثر شمارا</b> باشند
+          — و این برای یکنوای صعودی و نزولی یکسان برقرار است.</li>
+          <li>اما یک CDF هرگز نزولی نیست، چون $\{X\le x_1\}\subseteq\{X\le x_2\}$ و یکنوایی $P$
+          از اصول یک و سه کلموگروف نتیجه می‌شود.</li>
+          <li>پس هر پرش CDF رو به بالا است و ارتفاعش $P\{X=a\}=F(a)-F(a^-)$ است.</li>
+          <li>و راست‌پیوستگی، نتیجهٔ قرارداد $\le$ به‌علاوهٔ پیوستگی از بالای $P$ است — نه یک فرض اضافی.</li>
+        </ol>
+      </div>
+      <div class="note"><span class="lbl">یک پرسش برای برگرداندن به استاد</span>
+        اگر خواستید نشان دهید عمیق‌تر فکر کرده‌اید، این را بپرسید:
+        «آیا تابعی وجود دارد که ناکاهشی و راست‌پیوسته باشد، حدهایش ۰ و ۱ باشند، و با این حال
+        در هیچ بازه‌ای مشتق‌پذیر نباشد؟» — پاسخ بله است (تابع کانتور)، و این نشان می‌دهد
+        رابطهٔ $f = dF/dx$ یک <b>قضیه با پیش‌فرض</b> است، نه یک اتحاد.
+      </div>
+      <div class="step">یادآوری فعال</div>
+      <h3>آزمون این بخش</h3>
+      <p>چهار پرسش، و هر گزینه بازخورد تشخیصی دارد. <b>آستانهٔ تسلط: ۳ پاسخ درست</b>
+      به‌همراه ثبت دو تمرین از بخش بعد.</p>
+      <div id="quizQ"></div>
+
+      <div class="step">تمرین مستقل</div>
+      <h3>تمرین‌های CDF</h3>
+      <p>این سه تمرین پاسخ آماده ندارند. راهنمایی‌ها پله‌پله باز می‌شوند؛ پاسخ خود را در کادر بنویسید
+      (ذخیره می‌شود) و بعد در گفت‌وگو بفرستید تا بررسی کنم. تمرین <span class="en">Q-2</span>
+      همان متغیر آمیخته‌ای است که در میزکار بالا دیدید — این بار خودتان $F_T$ را بسازید.</p>
+      <div id="exQ"></div>
+    </div>
+  </section>
+
+  </main>
+</div>
+</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
